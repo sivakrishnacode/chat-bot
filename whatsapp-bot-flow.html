@@ -1,0 +1,674 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clickable WhatsApp Bot Flow — SpaceSolar (Responsive)</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,system-ui,Roboto,-apple-system;background:linear-gradient(180deg,#071028 0%, #061425 100%);color:#e6eef6}
+
+    /* Desktop layout */
+    .app{display:grid;grid-template-columns:360px 1fr 340px;gap:18px;padding:22px;height:100vh;box-sizing:border-box}
+    .panel{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    h1{font-size:16px;margin:0}
+    .subtitle{color:var(--muted);font-size:13px}
+    .flow-canvas{padding:20px;overflow:auto;height:calc(100vh - 120px);display:flex;align-items:flex-start}
+    .flow{display:flex;gap:22px;align-items:flex-start}
+    .node{min-width:220px;background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:14px;border-radius:10px;cursor:pointer;transition:transform .12s,box-shadow .12s}
+    .node:hover{transform:translateY(-6px);box-shadow:0 8px 30px rgba(3,8,18,0.6)}
+    .node.active{border:2px solid var(--accent);box-shadow:0 12px 40px rgba(6,182,212,0.07)}
+    .node h3{margin:0 0 8px 0;font-size:14px}
+    .node p{margin:0;color:var(--muted);font-size:13px}
+    .arrow{align-self:center;font-size:28px;color:var(--muted)}
+    .right-panel{display:flex;flex-direction:column;height:calc(100vh - 44px)}
+    .details{flex:1;overflow:auto}
+    label{font-size:13px;color:var(--muted);display:block;margin-top:12px}
+    input[type=text],textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;margin-top:6px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#022;cursor:pointer;border:none;font-weight:600}
+    .mutebtn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .quick-replies{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .qr{padding:6px 10px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.02);cursor:pointer}
+    .footer{font-size:13px;color:var(--muted);margin-top:10px}
+    .top-controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    textarea{min-height:96px}
+    .export-area{display:flex;gap:8px;align-items:center}
+    .node-list{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 180px);overflow:auto}
+    .node-item{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);align-items:center}
+    small{color:var(--muted)}
+    .help{font-size:13px;color:var(--muted);margin-top:8px}
+
+    /* Simulator modal and floating button */
+    .sim-toggle{position:fixed;right:18px;bottom:18px;width:64px;height:64px;border-radius:50%;background:var(--accent);color:#022;display:flex;align-items:center;justify-content:center;font-weight:700;z-index:1200;border:none;box-shadow:0 8px 24px rgba(6,182,212,0.18);cursor:pointer}
+    .sim-modal{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1300}
+    .sim-modal.open{display:flex}
+    .sim-panel{width:min(560px,94%);max-height:100dvh;background:var(--card);border-radius:12px;padding:12px;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(2,6,23,0.6);}
+    .sim-header{display:flex;align-items:center;justify-content:space-between;padding:6px 8px}
+    .sim-body{overflow:auto;padding:8px}
+
+    /* Responsive: stack panels vertically on small screens, show sim-toggle */
+    @media (max-width: 900px) {
+      .app{grid-template-columns:1fr;grid-auto-rows:auto;gap:12px;padding:12px;height:auto}
+      .flow-canvas{order:2;height:auto;padding:12px}
+      .panel{padding:12px}
+      .right-panel{order:3}
+      .panel:first-child{order:1}
+      .sim-toggle{display:flex}
+      /* keep the right-panel details compact */
+      .right-panel .details{min-height:120px}
+    }
+
+    @media (min-width: 901px) {
+      .sim-toggle{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel">
+      <header>
+        <div>
+          <h1>WhatsApp Bot Flow — SpaceSolar</h1>
+          <div class="subtitle">Clickable visual flow. Edit nodes, test quick replies, export JSON.</div>
+        </div>
+      </header>
+
+      <div class="top-controls">
+        <button class="btn" id="addNodeBtn">+ Add Node</button>
+        <button class="mutebtn" id="resetBtn">Reset</button>
+        <button class="mutebtn" id="runTestsBtn">Run Flow Tests</button>
+        <div style="margin-left:auto"><small id="nodeCount">26 nodes</small></div>
+      </div>
+
+      <div class="node-list" id="nodeList"><div class="node-item">
+          <div><strong>Welcome — Helio</strong><div><small>welcome_helio</small></div></div>
+          <div><button class="mutebtn" data-id="welcome_helio">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Locate Dealers</strong><div><small>dealers</small></div></div>
+          <div><button class="mutebtn" data-id="dealers">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Dealers — By PIN</strong><div><small>dealers_pin</small></div></div>
+          <div><button class="mutebtn" data-id="dealers_pin">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Dealers — Share Location</strong><div><small>dealers_location</small></div></div>
+          <div><button class="mutebtn" data-id="dealers_location">View</button></div>
+        </div><div class="node-item">
+          <div><strong>View Map</strong><div><small>view_map</small></div></div>
+          <div><button class="mutebtn" data-id="view_map">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Products</strong><div><small>products</small></div></div>
+          <div><button class="mutebtn" data-id="products">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Solar Panels</strong><div><small>prod_panels</small></div></div>
+          <div><button class="mutebtn" data-id="prod_panels">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Inverters</strong><div><small>prod_inverters</small></div></div>
+          <div><button class="mutebtn" data-id="prod_inverters">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Batteries</strong><div><small>prod_batteries</small></div></div>
+          <div><button class="mutebtn" data-id="prod_batteries">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Accessories</strong><div><small>prod_accessories</small></div></div>
+          <div><button class="mutebtn" data-id="prod_accessories">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Catalog — Panels</strong><div><small>catalog_panels</small></div></div>
+          <div><button class="mutebtn" data-id="catalog_panels">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Catalog — Inverters</strong><div><small>catalog_inverters</small></div></div>
+          <div><button class="mutebtn" data-id="catalog_inverters">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Catalog — Batteries</strong><div><small>catalog_batteries</small></div></div>
+          <div><button class="mutebtn" data-id="catalog_batteries">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Catalog — Accessories</strong><div><small>catalog_accessories</small></div></div>
+          <div><button class="mutebtn" data-id="catalog_accessories">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Request Quote</strong><div><small>request_quote</small></div></div>
+          <div><button class="mutebtn" data-id="request_quote">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Quote Submitted</strong><div><small>quote_submitted</small></div></div>
+          <div><button class="mutebtn" data-id="quote_submitted">View</button></div>
+        </div><div class="node-item">
+          <div><strong>How-to &amp; DIY</strong><div><small>howto</small></div></div>
+          <div><button class="mutebtn" data-id="howto">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Installation Tips</strong><div><small>how_install</small></div></div>
+          <div><button class="mutebtn" data-id="how_install">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Maintenance</strong><div><small>how_maint</small></div></div>
+          <div><button class="mutebtn" data-id="how_maint">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Troubleshooting</strong><div><small>how_troubleshoot</small></div></div>
+          <div><button class="mutebtn" data-id="how_troubleshoot">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Raise Ticket</strong><div><small>raise_ticket</small></div></div>
+          <div><button class="mutebtn" data-id="raise_ticket">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Ticket — Capture</strong><div><small>ticket_submit</small></div></div>
+          <div><button class="mutebtn" data-id="ticket_submit">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Ticket Submitted</strong><div><small>ticket_confirm</small></div></div>
+          <div><button class="mutebtn" data-id="ticket_confirm">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Sales Contact</strong><div><small>sales</small></div></div>
+          <div><button class="mutebtn" data-id="sales">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Call Sales</strong><div><small>call_sales</small></div></div>
+          <div><button class="mutebtn" data-id="call_sales">View</button></div>
+        </div><div class="node-item">
+          <div><strong>Back to Menu</strong><div><small>back_to_menu</small></div></div>
+          <div><button class="mutebtn" data-id="back_to_menu">View</button></div>
+        </div></div>
+
+      <div class="footer">Tip: click a node on the canvas to edit it on the right. Use quick replies to simulate user choices.</div>
+    </div>
+
+    <div class="panel flow-canvas" id="canvasPanel">
+      <div class="flow" id="flow"><div class="node active" data-id="welcome_helio">
+          <h3>Welcome — Helio <small style="font-size:11px;color:var(--muted);">(welcome_helio)</small></h3>
+          <p>Welcome to SpaceSolar — Powering tomorrow.
+Hi, I'm Helio. How can I help you today?</p>
+          <div class="quick-replies"><span class="qr">Locate Nearby Dealers</span><span class="qr">Products</span><span class="qr">How-to &amp; DIY</span><span class="qr">Raise Ticket</span></div>
+        </div><div class="node" data-id="dealers">
+          <h3>Locate Dealers <small style="font-size:11px;color:var(--muted);">(dealers)</small></h3>
+          <p>Share your PIN code or tap Share Location so we can find nearby SpaceSolar dealers.
+Options:</p>
+          <div class="quick-replies"><span class="qr">Send PIN Code</span><span class="qr">Share Location</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="dealers_pin">
+          <h3>Dealers — By PIN <small style="font-size:11px;color:var(--muted);">(dealers_pin)</small></h3>
+          <p>(Simulation) Please type your 6-digit PIN code. Example: 560001</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="dealers_location">
+          <h3>Dealers — Share Location <small style="font-size:11px;color:var(--muted);">(dealers_location)</small></h3>
+          <p>(Simulation) If user shares location, we return nearest dealer list:
+1) SpaceSolar Dealer — MG Road — 1.2 km
+2) SpaceSol...</p>
+          <div class="quick-replies"><span class="qr">View on Map</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="view_map">
+          <h3>View Map <small style="font-size:11px;color:var(--muted);">(view_map)</small></h3>
+          <p>[Map link simulation] Open in Maps: https://maps.app.goo.gl/example</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="products">
+          <h3>Products <small style="font-size:11px;color:var(--muted);">(products)</small></h3>
+          <p>Our product categories — choose to view details:</p>
+          <div class="quick-replies"><span class="qr">Solar Panels</span><span class="qr">Inverters</span><span class="qr">Batteries</span><span class="qr">Accessories</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="prod_panels">
+          <h3>Solar Panels <small style="font-size:11px;color:var(--muted);">(prod_panels)</small></h3>
+          <p>Solar Panels — Mono &amp; PERC options. Key specs: Efficiency 20%+, 25-year performance warranty. Want catalog or speak to s...</p>
+          <div class="quick-replies"><span class="qr">Catalog</span><span class="qr">Speak to Sales</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="prod_inverters">
+          <h3>Inverters <small style="font-size:11px;color:var(--muted);">(prod_inverters)</small></h3>
+          <p>Inverters — String &amp; Hybrid inverters. Key feature: smart monitoring. Want catalog or speak to sales?</p>
+          <div class="quick-replies"><span class="qr">Catalog</span><span class="qr">Speak to Sales</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="prod_batteries">
+          <h3>Batteries <small style="font-size:11px;color:var(--muted);">(prod_batteries)</small></h3>
+          <p>Batteries — Lithium &amp; VRLA options. Estimated backup hours depend on config. Want catalog or speak to sales?</p>
+          <div class="quick-replies"><span class="qr">Catalog</span><span class="qr">Speak to Sales</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="prod_accessories">
+          <h3>Accessories <small style="font-size:11px;color:var(--muted);">(prod_accessories)</small></h3>
+          <p>Accessories — Mounting, cables, MC4 connectors, AC DBs. Want catalog or speak to sales?</p>
+          <div class="quick-replies"><span class="qr">Catalog</span><span class="qr">Speak to Sales</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="catalog_panels">
+          <h3>Catalog — Panels <small style="font-size:11px;color:var(--muted);">(catalog_panels)</small></h3>
+          <p>[Panels Catalog PDF link]
+Would you like to request a quote?</p>
+          <div class="quick-replies"><span class="qr">Request Quote</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="catalog_inverters">
+          <h3>Catalog — Inverters <small style="font-size:11px;color:var(--muted);">(catalog_inverters)</small></h3>
+          <p>[Inverters Catalog PDF link]
+Would you like to request a quote?</p>
+          <div class="quick-replies"><span class="qr">Request Quote</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="catalog_batteries">
+          <h3>Catalog — Batteries <small style="font-size:11px;color:var(--muted);">(catalog_batteries)</small></h3>
+          <p>[Batteries Catalog PDF link]
+Would you like to request a quote?</p>
+          <div class="quick-replies"><span class="qr">Request Quote</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="catalog_accessories">
+          <h3>Catalog — Accessories <small style="font-size:11px;color:var(--muted);">(catalog_accessories)</small></h3>
+          <p>[Accessories Catalog link]
+Would you like to request a quote?</p>
+          <div class="quick-replies"><span class="qr">Request Quote</span><span class="qr">Back</span></div>
+        </div><div class="node" data-id="request_quote">
+          <h3>Request Quote <small style="font-size:11px;color:var(--muted);">(request_quote)</small></h3>
+          <p>Please share: Product code or name, your PIN code, and preferred contact number.
+Example: Panel P123, 560001, +91-98XXXX...</p>
+          <div class="quick-replies"><span class="qr">Submit</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="quote_submitted">
+          <h3>Quote Submitted <small style="font-size:11px;color:var(--muted);">(quote_submitted)</small></h3>
+          <p>Thanks — your quote request has been submitted. Our sales team will contact you within 24 hours.</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="howto">
+          <h3>How-to &amp; DIY <small style="font-size:11px;color:var(--muted);">(howto)</small></h3>
+          <p>How-to resources — choose a topic:</p>
+          <div class="quick-replies"><span class="qr">Installation Tips</span><span class="qr">Maintenance</span><span class="qr">Troubleshooting Videos</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="how_install">
+          <h3>Installation Tips <small style="font-size:11px;color:var(--muted);">(how_install)</small></h3>
+          <p>Short tips:
+• Site orientation matters (south-facing)
+• Avoid shading
+Watch full video: https://youtu.be/example_install</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="how_maint">
+          <h3>Maintenance <small style="font-size:11px;color:var(--muted);">(how_maint)</small></h3>
+          <p>Maintenance tips:
+• Clean panels monthly
+• Check connections quarterly
+Watch: https://youtu.be/example_maint</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="how_troubleshoot">
+          <h3>Troubleshooting <small style="font-size:11px;color:var(--muted);">(how_troubleshoot)</small></h3>
+          <p>DIY Troubleshooting videos:
+• Low output checks
+• Inverter error codes
+Watch playlist: https://youtube.com/playlist?list...</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="raise_ticket">
+          <h3>Raise Ticket <small style="font-size:11px;color:var(--muted);">(raise_ticket)</small></h3>
+          <p>Want to raise a service ticket? Please describe the issue (brief) and share your order ID or customer number if availabl...</p>
+          <div class="quick-replies"><span class="qr">Submit Issue</span><span class="qr">Speak to Agent</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="ticket_submit">
+          <h3>Ticket — Capture <small style="font-size:11px;color:var(--muted);">(ticket_submit)</small></h3>
+          <p>(Simulation) Please type your issue now. Example: "Inverter error E01 — under warranty"</p>
+          <div class="quick-replies"><span class="qr">Confirm &amp; Submit</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="ticket_confirm">
+          <h3>Ticket Submitted <small style="font-size:11px;color:var(--muted);">(ticket_confirm)</small></h3>
+          <p>Thanks — your ticket has been logged. Ticket ID: TS-2025-001. Our support team will reach out within 24 hours.</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="sales">
+          <h3>Sales Contact <small style="font-size:11px;color:var(--muted);">(sales)</small></h3>
+          <p>A sales representative will contact you. Please share best contact number or tap Call Sales.</p>
+          <div class="quick-replies"><span class="qr">Call Sales</span><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="call_sales">
+          <h3>Call Sales <small style="font-size:11px;color:var(--muted);">(call_sales)</small></h3>
+          <p>[Phone link simulation] tel:+911234567890</p>
+          <div class="quick-replies"><span class="qr">Back to Menu</span></div>
+        </div><div class="node" data-id="back_to_menu">
+          <h3>Back to Menu <small style="font-size:11px;color:var(--muted);">(back_to_menu)</small></h3>
+          <p>Returning to main menu.</p>
+          <div class="quick-replies"><span class="qr">Main Menu</span></div>
+        </div></div>
+    </div>
+
+    <div class="panel right-panel">
+      <div class="details">
+        <h3 id="detailTitle">Editing: Welcome — Helio</h3>
+        <div class="help">Select a node to view or edit its message, quick replies, and transition target.</div>
+
+        <label>Node ID</label>
+        <input type="text" id="nodeId" readonly="">
+
+        <label>Title (short)</label>
+        <input type="text" id="nodeTitle">
+
+        <label>Message (what bot sends)</label>
+        <textarea id="nodeMessage"></textarea>
+
+        <label>Quick replies (comma separated) — clicking them will navigate to the linked node</label>
+        <input type="text" id="nodeReplies" placeholder="e.g. Locate Nearby Dealers, Products, How-to &amp; DIY">
+
+        <label>Reply targets (comma separated node IDs — align with quick replies)</label>
+        <input type="text" id="nodeTargets" placeholder="e.g. dealers,products,howto">
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn" id="saveNode">Save</button>
+          <button class="mutebtn" id="deleteNode">Delete</button>
+        </div>
+
+        <hr style="margin:16px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+        <h4>Test chat simulator</h4>
+        <!-- chatSim stays here on desktop; on mobile it will be moved into modal when user opens simulator -->
+        <div id="chatSim" style="background:transparent;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);min-height:140px"><div style="margin: 8px 0px;"><div style="background: rgba(6, 182, 212, 0.08); display: inline-block; padding: 8px 12px; border-radius: 12px; max-width: 92%;">Welcome to SpaceSolar — Powering tomorrow.<br>Hi, I'm Helio. How can I help you today?</div></div><div class="quick-replies"><div class="qr">Locate Nearby Dealers</div><div class="qr">Products</div><div class="qr">How-to &amp; DIY</div><div class="qr">Raise Ticket</div></div></div>
+        <div style="margin-top:8px"><small class="muted">Click quick replies to simulate a user tapping a WhatsApp button.</small></div>
+
+      </div>
+
+      <div style="padding-top:10px">
+        <div class="export-area">
+          <button class="btn" id="exportJson">Export JSON</button>
+          <button class="mutebtn" id="downloadHtml">Download HTML</button>
+        </div>
+        <div style="margin-top:10px"><small class="muted">You can paste exported JSON into a WhatsApp-business webhook or a flow-builder.</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating simulator toggle (visible on small screens) -->
+  <button class="sim-toggle" id="openSimBtn" title="Open simulator">💬</button>
+
+  <!-- Modal for simulator on mobile -->
+  <div class="sim-modal" id="simModal" aria-hidden="true">
+    <div class="sim-panel" role="dialog" aria-modal="true">
+      <div class="sim-header">
+        <strong>Chat Simulator</strong>
+        <div>
+          <button class="mutebtn" id="closeSimBtn">Close</button>
+        </div>
+      </div>
+      <div class="sim-body" id="simModalContent" style="min-height:240px;overflow:auto"></div>
+    </div>
+  </div>
+
+  <script>
+    // SpaceSolar default flow (fixed bot name: Helio)
+    const defaultFlow = [
+      {id:'welcome_helio',title:'Welcome — Helio',message:'Welcome to SpaceSolar — Powering tomorrow.\nHi, I\'m Helio. How can I help you today?',replies:['Locate Nearby Dealers','Products','How-to & DIY','Raise Ticket'],targets:['dealers','products','howto','raise_ticket']},
+      {id:'dealers',title:'Locate Dealers',message:'Share your PIN code or tap Share Location so we can find nearby SpaceSolar dealers.\nOptions:',replies:['Send PIN Code','Share Location','Back to Menu'],targets:['dealers_pin','dealers_location','back_to_menu']},
+      {id:'dealers_pin',title:'Dealers — By PIN',message:'(Simulation) Please type your 6-digit PIN code. Example: 560001',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'dealers_location',title:'Dealers — Share Location',message:'(Simulation) If user shares location, we return nearest dealer list:\n1) SpaceSolar Dealer — MG Road — 1.2 km\n2) SpaceSolar Partner — Indiranagar — 3.4 km',replies:['View on Map','Back to Menu'],targets:['view_map','back_to_menu']},
+      {id:'view_map',title:'View Map',message:'[Map link simulation] Open in Maps: https://maps.app.goo.gl/example',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'products',title:'Products',message:'Our product categories — choose to view details:',replies:['Solar Panels','Inverters','Batteries','Accessories','Back'],targets:['prod_panels','prod_inverters','prod_batteries','prod_accessories','back_to_menu']},
+      {id:'prod_panels',title:'Solar Panels',message:'Solar Panels — Mono & PERC options. Key specs: Efficiency 20%+, 25-year performance warranty. Want catalog or speak to sales?',replies:['Catalog','Speak to Sales','Back'],targets:['catalog_panels','sales','products']},
+      {id:'prod_inverters',title:'Inverters',message:'Inverters — String & Hybrid inverters. Key feature: smart monitoring. Want catalog or speak to sales?',replies:['Catalog','Speak to Sales','Back'],targets:['catalog_inverters','sales','products']},
+      {id:'prod_batteries',title:'Batteries',message:'Batteries — Lithium & VRLA options. Estimated backup hours depend on config. Want catalog or speak to sales?',replies:['Catalog','Speak to Sales','Back'],targets:['catalog_batteries','sales','products']},
+      {id:'prod_accessories',title:'Accessories',message:'Accessories — Mounting, cables, MC4 connectors, AC DBs. Want catalog or speak to sales?',replies:['Catalog','Speak to Sales','Back'],targets:['catalog_accessories','sales','products']},
+      {id:'catalog_panels',title:'Catalog — Panels',message:'[Panels Catalog PDF link]\nWould you like to request a quote?',replies:['Request Quote','Back'],targets:['request_quote','products']},
+      {id:'catalog_inverters',title:'Catalog — Inverters',message:'[Inverters Catalog PDF link]\nWould you like to request a quote?',replies:['Request Quote','Back'],targets:['request_quote','products']},
+      {id:'catalog_batteries',title:'Catalog — Batteries',message:'[Batteries Catalog PDF link]\nWould you like to request a quote?',replies:['Request Quote','Back'],targets:['request_quote','products']},
+      {id:'catalog_accessories',title:'Catalog — Accessories',message:'[Accessories Catalog link]\nWould you like to request a quote?',replies:['Request Quote','Back'],targets:['request_quote','products']},
+      {id:'request_quote',title:'Request Quote',message:'Please share: Product code or name, your PIN code, and preferred contact number.\nExample: Panel P123, 560001, +91-98XXXXXXX',replies:['Submit','Back to Menu'],targets:['quote_submitted','back_to_menu']},
+      {id:'quote_submitted',title:'Quote Submitted',message:'Thanks — your quote request has been submitted. Our sales team will contact you within 24 hours.',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'howto',title:'How-to & DIY',message:'How-to resources — choose a topic:',replies:['Installation Tips','Maintenance','Troubleshooting Videos','Back to Menu'],targets:['how_install','how_maint','how_troubleshoot','back_to_menu']},
+      {id:'how_install',title:'Installation Tips',message:'Short tips:\n• Site orientation matters (south-facing)\n• Avoid shading\nWatch full video: https://youtu.be/example_install',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'how_maint',title:'Maintenance',message:'Maintenance tips:\n• Clean panels monthly\n• Check connections quarterly\nWatch: https://youtu.be/example_maint',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'how_troubleshoot',title:'Troubleshooting',message:'DIY Troubleshooting videos:\n• Low output checks\n• Inverter error codes\nWatch playlist: https://youtube.com/playlist?list=example',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'raise_ticket',title:'Raise Ticket',message:'Want to raise a service ticket? Please describe the issue (brief) and share your order ID or customer number if available.',replies:['Submit Issue','Speak to Agent','Back to Menu'],targets:['ticket_submit','agent','back_to_menu']},
+      {id:'ticket_submit',title:'Ticket — Capture',message:'(Simulation) Please type your issue now. Example: "Inverter error E01 — under warranty"',replies:['Confirm & Submit','Back to Menu'],targets:['ticket_confirm','back_to_menu']},
+      {id:'ticket_confirm',title:'Ticket Submitted',message:'Thanks — your ticket has been logged. Ticket ID: TS-2025-001. Our support team will reach out within 24 hours.',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'sales',title:'Sales Contact',message:'A sales representative will contact you. Please share best contact number or tap Call Sales.',replies:['Call Sales','Back to Menu'],targets:['call_sales','back_to_menu']},
+      {id:'call_sales',title:'Call Sales',message:'[Phone link simulation] tel:+911234567890',replies:['Back to Menu'],targets:['back_to_menu']},
+      {id:'back_to_menu',title:'Back to Menu',message:'Returning to main menu.',replies:['Main Menu'],targets:['welcome_helio']}
+    ];
+
+    // App state and DOM refs
+    let flow = [];
+    const flowEl = document.getElementById('flow');
+    const nodeListEl = document.getElementById('nodeList');
+    const nodeCountEl = document.getElementById('nodeCount');
+
+    // Chat simulator movement helpers (for modal)
+    const chatSim = document.getElementById('chatSim');
+    const simModal = document.getElementById('simModal');
+    const simModalContent = document.getElementById('simModalContent');
+    const openSimBtn = document.getElementById('openSimBtn');
+    const closeSimBtn = document.getElementById('closeSimBtn');
+    const chatSimPlaceholder = document.createElement('div');
+    chatSimPlaceholder.id = 'chatSimPlaceholder';
+
+    function openSimulator() {
+      // move chatSim into modal
+      if (chatSim.parentNode !== simModalContent) {
+        chatSim.parentNode.replaceChild(chatSimPlaceholder, chatSim);
+        simModalContent.appendChild(chatSim);
+      }
+      simModal.classList.add('open');
+      simModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeSimulator() {
+      // move chatSim back to details if placeholder exists
+      if (chatSim.parentNode === simModalContent) {
+        simModalContent.removeChild(chatSim);
+        const placeholder = document.getElementById('chatSimPlaceholder');
+        if (placeholder) {
+          placeholder.parentNode.replaceChild(chatSim, placeholder);
+        }
+      }
+      simModal.classList.remove('open');
+      simModal.setAttribute('aria-hidden', 'true');
+    }
+
+    openSimBtn.addEventListener('click', openSimulator);
+    closeSimBtn.addEventListener('click', closeSimulator);
+    simModal.addEventListener('click', function(e){ if(e.target === simModal) closeSimulator(); });
+
+    // Load sample flow (deep clone)
+    function loadDefault() {
+      flow = JSON.parse(JSON.stringify(defaultFlow));
+      render();
+      if (flow.length > 0) selectNode(flow[0].id);
+    }
+
+    // Render canvas and sidebar list
+    function render() {
+      flowEl.innerHTML = '';
+      nodeListEl.innerHTML = '';
+
+      flow.forEach(function(n) {
+        const node = document.createElement('div');
+        node.className = 'node';
+        node.dataset.id = n.id;
+
+        // ensure message is string
+        const msgPreview = String(n.message || '').slice(0, 120);
+
+        node.innerHTML = `\n          <h3>${escapeHtml(n.title)} <small style="font-size:11px;color:var(--muted);">(${n.id})</small></h3>\n          <p>${escapeHtml(msgPreview)}${String(n.message || '').length > 120 ? '...' : ''}</p>\n          <div class="quick-replies">${(n.replies || []).map(function(r){ return `<span class="qr">${escapeHtml(r)}</span>`}).join('')}</div>\n        `;
+
+        node.addEventListener('click', function() { selectNode(n.id); });
+        flowEl.appendChild(node);
+
+        const listItem = document.createElement('div');
+        listItem.className = 'node-item';
+        listItem.innerHTML = `\n          <div><strong>${escapeHtml(n.title)}</strong><div><small>${n.id}</small></div></div>\n          <div><button class="mutebtn" data-id="${n.id}">View</button></div>\n        `;
+        listItem.querySelector('button').addEventListener('click', function() { selectNode(n.id); });
+        nodeListEl.appendChild(listItem);
+      });
+
+      nodeCountEl.textContent = flow.length + ' nodes';
+
+      // highlight active node in canvas
+      const prevActive = document.querySelector('.node.active');
+      if (prevActive) prevActive.classList.remove('active');
+      if (selectedNodeId) {
+        const el = document.querySelector(`.node[data-id='${selectedNodeId}']`);
+        if (el) el.classList.add('active');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    }
+
+    // selection and editing
+    let selectedNodeId = null;
+    function selectNode(id) {
+      selectedNodeId = id;
+      const n = flow.find(function(x){ return x.id === id; });
+
+      if (!n) {
+        document.getElementById('detailTitle').textContent = 'No node selected';
+        document.getElementById('nodeId').value = '';
+        document.getElementById('nodeTitle').value = '';
+        document.getElementById('nodeMessage').value = '';
+        document.getElementById('nodeReplies').value = '';
+        document.getElementById('nodeTargets').value = '';
+        render();
+        return;
+      }
+
+      document.getElementById('detailTitle').textContent = 'Editing: ' + n.title;
+      document.getElementById('nodeId').value = n.id;
+      document.getElementById('nodeTitle').value = n.title;
+      document.getElementById('nodeMessage').value = n.message;
+      document.getElementById('nodeReplies').value = (n.replies || []).join(',');
+      document.getElementById('nodeTargets').value = (n.targets || []).join(',');
+
+      render();
+      renderChatFrom(n.id);
+    }
+
+    // controls
+    document.getElementById('addNodeBtn').addEventListener('click', function() {
+      const id = prompt('New node id (no spaces, unique)');
+      if (!id) return;
+      if (flow.find(function(x){ return x.id === id; })) { alert('id exists'); return; }
+      const title = prompt('Title (short)') || id;
+      flow.push({ id: id, title: title, message: 'New message', replies: [], targets: [] });
+      render();
+      selectNode(id);
+    });
+
+    document.getElementById('saveNode').addEventListener('click', function() {
+      if (!selectedNodeId) { alert('Select node'); return; }
+      const n = flow.find(function(x){ return x.id === selectedNodeId; });
+      if (!n) return;
+      n.title = (document.getElementById('nodeTitle').value || n.title).trim();
+      n.message = document.getElementById('nodeMessage').value;
+      n.replies = document.getElementById('nodeReplies').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      n.targets = document.getElementById('nodeTargets').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      render();
+      selectNode(n.id);
+    });
+
+    document.getElementById('deleteNode').addEventListener('click', function() {
+      if (!selectedNodeId) return;
+      if (!confirm('Delete node ' + selectedNodeId + '?')) return;
+      flow = flow.filter(function(x){ return x.id !== selectedNodeId; });
+      // remove targets that reference it
+      flow.forEach(function(x){
+        x.targets = (x.targets || []).map(function(t){ return t === selectedNodeId ? null : t; }).filter(Boolean);
+      });
+      selectedNodeId = null;
+      render();
+      if (flow.length) selectNode(flow[0].id);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      if (!confirm('Reset to default sample flow?')) return;
+      loadDefault();
+    });
+
+    // Run tests: ensures targets point to existing nodes and ids are unique
+    function runFlowTests() {
+      const results = { errors: [], warnings: [] };
+      const ids = new Set();
+      flow.forEach(function(n){
+        if (ids.has(n.id)) results.errors.push('Duplicate id: ' + n.id);
+        ids.add(n.id);
+      });
+      flow.forEach(function(n){
+        (n.targets || []).forEach(function(t){
+          if (!flow.find(function(x){ return x.id === t; })) results.errors.push('Broken target: ' + n.id + ' -> ' + t);
+        });
+      });
+      // Show results
+      if (results.errors.length) {
+        alert('Flow Tests — Errors:\n' + results.errors.join('\n'));
+      } else {
+        alert('Flow Tests — All checks passed');
+      }
+      return results;
+    }
+
+    document.getElementById('runTestsBtn').addEventListener('click', runFlowTests);
+
+    // chat simulator (robust)
+    function renderChatFrom(nodeId) {
+      const sim = document.getElementById('chatSim');
+      sim.innerHTML = '';
+      const n = flow.find(function(x){ return x.id === nodeId; });
+      if (!n) return;
+
+      appendBot(n.message);
+
+      const qrWrap = document.createElement('div');
+      qrWrap.className = 'quick-replies';
+
+      (n.replies || []).forEach(function(r, i) {
+        const btn = document.createElement('div');
+        btn.className = 'qr';
+        btn.textContent = r;
+
+        btn.onclick = function() {
+          try {
+            const target = (n.targets && n.targets[i]) || null;
+            appendUser(r);
+
+            if (target) {
+              const next = flow.find(function(x){ return x.id === target; });
+              if (next) {
+                setTimeout(function() {
+                  appendBot(next.message);
+                  renderChatFrom(next.id);
+                }, 400);
+              } else {
+                setTimeout(function() {
+                  appendBot('No node found for target: ' + (n.targets && n.targets[i] ? n.targets[i] : '—'));
+                }, 300);
+              }
+            }
+          } catch (err) {
+            console.error('Simulator error', err);
+          }
+        };
+
+        qrWrap.appendChild(btn);
+      });
+
+      sim.appendChild(qrWrap);
+      sim.scrollTop = sim.scrollHeight;
+    }
+
+    function appendBot(text) {
+      const sim = document.getElementById('chatSim');
+      const d = document.createElement('div');
+      d.style.margin = '8px 0';
+      const inner = document.createElement('div');
+      inner.style.background = 'rgba(6,182,212,0.08)';
+      inner.style.display = 'inline-block';
+      inner.style.padding = '8px 12px';
+      inner.style.borderRadius = '12px';
+      inner.style.maxWidth = '92%';
+      inner.innerText = String(text || '');
+      d.appendChild(inner);
+      sim.appendChild(d);
+    }
+
+    function appendUser(text) {
+      const sim = document.getElementById('chatSim');
+      const d = document.createElement('div');
+      d.style.margin = '8px 0';
+      d.style.textAlign = 'right';
+      const inner = document.createElement('div');
+      inner.style.display = 'inline-block';
+      inner.style.padding = '8px 12px';
+      inner.style.borderRadius = '12px';
+      inner.style.background = 'rgba(255,255,255,0.04)';
+      inner.style.maxWidth = '92%';
+      inner.innerText = String(text || '');
+      d.appendChild(inner);
+      sim.appendChild(d);
+    }
+
+    // export
+    document.getElementById('exportJson').addEventListener('click', function() {
+      const data = JSON.stringify(flow, null, 2);
+      prompt('Copy flow JSON', data);
+    });
+
+    // download HTML (self-contained)
+    document.getElementById('downloadHtml').addEventListener('click', function() {
+      const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'whatsapp-bot-flow.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // small helpers
+    document.getElementById('nodeList').addEventListener('click', function() {});
+
+    // init
+    loadDefault();
+
+    // expose for console debugging and testing
+    window.__botFlow = function() { return flow; };
+    window.__runFlowTests = runFlowTests;
+  </script>
+
+
+</body></html>

@@ -1,0 +1,1 @@
+# Keep this folder so Docker COPY does not fail if public is empty

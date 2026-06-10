@@ -1,0 +1,57 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String    @id @default(cuid())
+  name      String
+  industry  String?
+  phone     String?
+  email     String?
+  logoUrl   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  flows     BotFlow[]
+}
+
+model BotFlow {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean    @default(true)
+  clientId    String
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nodes       FlowNode[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([clientId])
+}
+
+model FlowNode {
+  id       String   @id @default(cuid())
+  // The human-readable short key used in targets (e.g. "welcome_helio")
+  key      String
+  title    String
+  message  String   @db.Text
+  // Ordered list of quick-reply button labels
+  replies  String[] @default([])
+  // Ordered list of FlowNode.key targets matching replies by index
+  targets  String[] @default([])
+  // Position in canvas (optional, for future drag-and-drop)
+  posX     Int      @default(0)
+  posY     Int      @default(0)
+  flowId   String
+  flow     BotFlow  @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([flowId, key])
+  @@index([flowId])
+}
