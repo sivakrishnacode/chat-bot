@@ -83,8 +83,8 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
     <div
       className="flex flex-col"
       style={{
-        width: 360,
-        height: 620,
+        width: "min(360px, calc(100vw - 32px))",
+        height: "min(620px, calc(100vh - 64px))",
         background: "#0b1120",
         borderRadius: 20,
         overflow: "hidden",

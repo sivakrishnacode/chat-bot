@@ -98,6 +98,15 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   const [showSim, setShowSim] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const onSelectRef = useRef<(key: string) => void>(() => {});
   const selectNode = useCallback((key: string) => {
@@ -266,7 +275,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   return (
     <div className="flex flex-col h-screen" style={{ background: "#0b1120" }}>
       <div
-        className="flex items-center gap-3 px-5 py-3 border-b shrink-0"
+        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b shrink-0 flex-wrap"
         style={{
           background: "#111827",
           borderColor: "rgba(255,255,255,0.06)",
@@ -274,26 +283,26 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
       >
         <Link
           href={`/clients/${flow.clientId}`}
-          className="text-xs px-2 py-1 rounded"
+          className="text-xs px-2 py-1 rounded shrink-0"
           style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
         >
           ← Back
         </Link>
 
-        <div className="h-4 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="h-4 w-px shrink-0" style={{ background: "rgba(255,255,255,0.08)" }} />
 
-        <div>
-          <span className="text-sm font-semibold">{flow.name}</span>
-          <span className="ml-2 text-xs" style={{ color: "#475569" }}>
+        <div className="min-w-0 flex-1 sm:flex-initial">
+          <span className="text-xs sm:text-sm font-semibold truncate">{flow.name}</span>
+          <span className="ml-1.5 text-xs" style={{ color: "#475569" }}>
             {localNodes.length} nodes
           </span>
         </div>
 
-        <div className="flex-1" />
+        <div className="hidden sm:block flex-1" />
 
         {saveMsg && (
           <span
-            className="text-xs px-2 py-1 rounded"
+            className="text-xs px-2 py-1 rounded hidden sm:inline"
             style={{
               color: saveMsg.includes("\u2713") ? "#25d366" : "#ef4444",
               background: saveMsg.includes("\u2713")
@@ -307,18 +316,19 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
 
         <button
           onClick={handleAutoLayout}
-          className="text-xs px-3 py-1.5 rounded-lg border"
+          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border shrink-0"
           style={{
             borderColor: "rgba(255,255,255,0.08)",
             color: "#94a3b8",
           }}
         >
-          Auto Layout
+          <span className="hidden sm:inline">Auto Layout</span>
+          <span className="sm:hidden" title="Auto Layout">⟳</span>
         </button>
 
         <button
           onClick={handleAddNode}
-          className="text-xs px-3 py-1.5 rounded-lg"
+          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shrink-0"
           style={{ background: "rgba(6,182,212,0.1)", color: "#06b6d4", border: "1px solid rgba(6,182,212,0.2)" }}
         >
           + Node
@@ -326,7 +336,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
 
         <button
           onClick={() => setShowSim(true)}
-          className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-semibold shrink-0"
           style={{ background: "#25d366", color: "#000" }}
         >
           ▶ Demo
@@ -335,7 +345,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="text-xs px-4 py-1.5 rounded-lg font-semibold disabled:opacity-50"
+          className="text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-semibold disabled:opacity-50 shrink-0"
           style={{ background: "#1d4ed8", color: "#fff" }}
         >
           {saving ? "Saving\u2026" : "Save"}
@@ -387,29 +397,67 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
               }}
             />
           </ReactFlow>
+
+          {isMobile && selectedNodeData && (
+            <button
+              onClick={() => setEditorOpen(true)}
+              className="fixed bottom-4 right-4 z-20 w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-sm font-semibold"
+              style={{ background: "#25d366", color: "#000" }}
+              aria-label="Edit node"
+            >
+              ✎
+            </button>
+          )}
         </div>
 
-        <div
-          className="shrink-0 border-l overflow-hidden"
-          style={{
-            width: 300,
-            background: "#111827",
-            borderColor: "rgba(255,255,255,0.06)",
-          }}
-        >
-          <NodeEditor
-            node={selectedNodeData}
-            allNodes={localNodes}
-            onSave={handleEditorSave}
-            onDelete={handleEditorDelete}
-            onClose={() => setSelectedKey(null)}
-          />
-        </div>
+        {!isMobile && (
+          <div
+            className="shrink-0 border-l overflow-hidden hidden md:block"
+            style={{
+              width: 300,
+              background: "#111827",
+              borderColor: "rgba(255,255,255,0.06)",
+            }}
+          >
+            <NodeEditor
+              node={selectedNodeData}
+              allNodes={localNodes}
+              onSave={handleEditorSave}
+              onDelete={handleEditorDelete}
+              onClose={() => setSelectedKey(null)}
+            />
+          </div>
+        )}
       </div>
+
+      {isMobile && editorOpen && (
+        <div
+          className="fixed inset-0 z-30"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={() => setEditorOpen(false)}
+        >
+          <div
+            className="absolute bottom-0 left-0 right-0 max-h-[75vh] overflow-auto rounded-t-2xl"
+            style={{ background: "#111827" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-center pt-2 pb-1">
+              <div className="w-8 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
+            </div>
+            <NodeEditor
+              node={selectedNodeData}
+              allNodes={localNodes}
+              onSave={handleEditorSave}
+              onDelete={handleEditorDelete}
+              onClose={() => setEditorOpen(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {showSim && (
         <div
-          className="fixed inset-0 flex items-center justify-center z-50"
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
           style={{ background: "rgba(0,0,0,0.65)" }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowSim(false);
