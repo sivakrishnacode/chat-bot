@@ -22,6 +22,33 @@ interface ClientDetail {
   flows: FlowSummary[];
 }
 
+function CopyDemoLink({ flowId }: { flowId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    const url = `${window.location.origin}/demo/${flowId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="p-2 rounded-lg text-sm"
+      style={{
+        color: copied ? "#25d366" : "#64748b",
+        background: "rgba(255,255,255,0.04)",
+      }}
+      title={copied ? "Copied!" : "Copy demo link"}
+    >
+      {copied ? "\u2713" : "\uD83D\uDD17"}
+    </button>
+  );
+}
+
 export default function ClientDetailClient({
   initialClient,
   clientId,
@@ -232,6 +259,7 @@ export default function ClientDetailClient({
                 >
                   Open Builder
                 </Link>
+                <CopyDemoLink flowId={f.id} />
                 <button
                   onClick={() => deleteFlow(f.id, f.name)}
                   className="p-2 rounded-lg text-sm"
