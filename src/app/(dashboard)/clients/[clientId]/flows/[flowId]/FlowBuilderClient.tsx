@@ -137,17 +137,12 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   const [rfNodes, setRfNodes] = useNodesState(initialRFNodes);
   const [rfEdges, setRfEdges] = useEdgesState(initialRFEdges);
 
-  const prevLocalNodesRef = useRef(localNodes);
   useEffect(() => {
-    const prev = prevLocalNodesRef.current;
-    prevLocalNodesRef.current = localNodes;
-
-    setRfNodes((currentNodes) => {
-      const posMap = new Map(currentNodes.map((n) => [n.id, n.position]));
-      return localNodes.map((n) => ({
+    setRfNodes(() =>
+      localNodes.map((n) => ({
         id: n.key,
         type: "botNode",
-        position: posMap.get(n.key) ?? { x: n.posX || 0, y: n.posY || 0 },
+        position: { x: n.posX || 0, y: n.posY || 0 },
         data: {
           key: n.key,
           title: n.title,
@@ -157,8 +152,8 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
           isStart: n.key === startKey,
           onSelect: stableOnSelect,
         } satisfies BotNodeData,
-      }));
-    });
+      }))
+    );
     setRfEdges(buildEdges(localNodes));
   }, [localNodes, startKey, stableOnSelect]);
 
