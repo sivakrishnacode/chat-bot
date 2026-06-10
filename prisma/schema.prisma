@@ -44,6 +44,7 @@ model FlowNode {
   replies  String[] @default([])
   // Ordered list of FlowNode.key targets matching replies by index
   targets  String[] @default([])
+  isStart  Boolean  @default(false)
   // Position in canvas (optional, for future drag-and-drop)
   posX     Int      @default(0)
   posY     Int      @default(0)

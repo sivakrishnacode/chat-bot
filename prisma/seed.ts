@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 const spaceSolarNodes = [
   {
     key: "welcome_helio",
+    isStart: true,
     title: "Welcome — Helio",
     message:
       "Welcome to SpaceSolar — Powering tomorrow.\nHi, I'm Helio 🌞. How can I help you today?",

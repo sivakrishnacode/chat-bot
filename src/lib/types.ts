@@ -7,6 +7,7 @@ export interface FlowNode {
   message: string;
   replies: string[];
   targets: string[];
+  isStart?: boolean;
   posX: number;
   posY: number;
   flowId: string;

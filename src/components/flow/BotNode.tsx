@@ -44,20 +44,18 @@ function BotNode({ data, selected }: NodeProps) {
         overflow: "hidden",
       }}
     >
-      {/* Target handle (input) — top */}
-      {!isStart && (
-        <Handle
-          id="target-in"
-          type="target"
-          position={Position.Top}
-          style={{
-            background: "#06b6d4",
-            width: 10,
-            height: 10,
-            border: "2px solid #0b1120",
-          }}
-        />
-      )}
+      {/* Target handle (input) — top (always rendered — start nodes can be targets too) */}
+      <Handle
+        id="target-in"
+        type="target"
+        position={Position.Top}
+        style={{
+          background: "#06b6d4",
+          width: 10,
+          height: 10,
+          border: "2px solid #0b1120",
+        }}
+      />
 
       {/* Header */}
       <div

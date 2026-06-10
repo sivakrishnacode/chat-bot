@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: Params) {
 export async function POST(req: Request, { params }: Params) {
   const { flowId } = await params;
   const body = await req.json();
-  const { key, title, message, replies, targets } = body;
+  const { key, title, message, replies, targets, isStart } = body;
 
   if (!key?.trim()) {
     return NextResponse.json({ error: "Node key is required" }, { status: 400 });
@@ -38,6 +38,7 @@ export async function POST(req: Request, { params }: Params) {
       message: message || "",
       replies: replies || [],
       targets: targets || [],
+      isStart: isStart ?? false,
     },
   });
 
@@ -73,6 +74,7 @@ export async function PUT(req: Request, { params }: Params) {
         message: string;
         replies: string[];
         targets: string[];
+        isStart?: boolean;
         posX?: number;
         posY?: number;
       }) => ({
@@ -82,6 +84,7 @@ export async function PUT(req: Request, { params }: Params) {
         message: n.message || "",
         replies: n.replies || [],
         targets: n.targets || [],
+        isStart: n.isStart ?? false,
         posX: n.posX ?? 0,
         posY: n.posY ?? 0,
       })),
