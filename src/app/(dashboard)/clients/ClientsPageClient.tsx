@@ -62,18 +62,21 @@ export default function ClientsPageClient({
                 value={form.name}
                 onChange={(v) => setForm((f) => ({ ...f, name: v }))}
                 placeholder="SpaceSolar, Raj Caterers…"
+                disabled={saving}
               />
               <Field
                 label="Industry"
                 value={form.industry}
                 onChange={(v) => setForm((f) => ({ ...f, industry: v }))}
                 placeholder="Solar Energy, Restaurant…"
+                disabled={saving}
               />
               <Field
                 label="Email"
                 value={form.email}
                 onChange={(v) => setForm((f) => ({ ...f, email: v }))}
                 placeholder="owner@business.com"
+                disabled={saving}
               />
             </div>
             <div className="flex gap-3 mt-5">
@@ -83,7 +86,7 @@ export default function ClientsPageClient({
                 className="flex-1 py-2 rounded-lg font-semibold text-sm transition-opacity hover:opacity-80 disabled:opacity-40"
                 style={{ background: "var(--accent)", color: "#000" }}
               >
-          {saving ? "Creating…" : "Create Client"}
+                {saving ? "Creating…" : "Create Client"}
               </button>
               <button
                 onClick={() => setShowNew(false)}
@@ -142,11 +145,13 @@ function Field({
   value,
   onChange,
   placeholder,
+  disabled,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -157,7 +162,8 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 rounded-lg border text-sm outline-none focus:border-white/20"
+        disabled={disabled}
+        className="w-full px-3 py-2 rounded-lg border text-sm outline-none focus:border-white/20 disabled:opacity-40"
         style={{
           background: "var(--surface-2)",
           borderColor: "var(--border)",

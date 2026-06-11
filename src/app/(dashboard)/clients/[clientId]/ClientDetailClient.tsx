@@ -24,8 +24,10 @@ interface ClientDetail {
 
 function CopyDemoLink({ flowId }: { flowId: string }) {
   const [copied, setCopied] = useState(false);
+  const [copying, setCopying] = useState(false);
 
   async function handleCopy() {
+    setCopying(true);
     const url = `${window.location.origin}/demo/${flowId}`;
     try {
       await navigator.clipboard.writeText(url);
@@ -39,6 +41,7 @@ function CopyDemoLink({ flowId }: { flowId: string }) {
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
+    setCopying(false);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -46,14 +49,15 @@ function CopyDemoLink({ flowId }: { flowId: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="p-2 rounded-lg text-sm"
+      disabled={copying}
+      className="p-2 rounded-lg text-sm disabled:opacity-40"
       style={{
         color: copied ? "#25d366" : "#64748b",
         background: "rgba(255,255,255,0.04)",
       }}
-      title={copied ? "Copied!" : "Copy demo link"}
+      title={copying ? "Copying…" : copied ? "Copied!" : "Copy demo link"}
     >
-      {copied ? "\u2713" : "\uD83D\uDD17"}
+      {copying ? "..." : copied ? "\u2713" : "\uD83D\uDD17"}
     </button>
   );
 }
@@ -71,6 +75,8 @@ export default function ClientDetailClient({
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   async function createFlow() {
     if (!newName.trim()) return;
@@ -88,8 +94,30 @@ export default function ClientDetailClient({
     router.push(`/clients/${clientId}/flows/${flow.id}`);
   }
 
+  async function duplicateFlow(flowId: string, name: string) {
+    setDuplicating(flowId);
+    const res = await fetch(`/api/clients/${clientId}/flows/${flowId}`);
+    const original = await res.json();
+    const dupRes = await fetch(`/api/clients/${clientId}/flows`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: `Copy of ${name}`, description: original.description }),
+    });
+    const dupFlow = await dupRes.json();
+    await fetch(`/api/clients/${clientId}/flows/${dupFlow.id}/nodes`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nodes: original.nodes }),
+    });
+    const updatedRes = await fetch(`/api/clients/${clientId}/flows/`);
+    const updatedFlows = await updatedRes.json();
+    setClient((prev) => ({ ...prev, flows: updatedFlows }));
+    setDuplicating(null);
+  }
+
   async function deleteFlow(flowId: string, name: string) {
     if (!confirm(`Delete flow "${name}"? This cannot be undone.`)) return;
+    setDeleting(flowId);
     await fetch(`/api/clients/${clientId}/flows/${flowId}`, {
       method: "DELETE",
     });
@@ -97,6 +125,7 @@ export default function ClientDetailClient({
       ...prev,
       flows: prev.flows.filter((f) => f.id !== flowId),
     }));
+    setDeleting(null);
   }
 
   return (
@@ -270,12 +299,22 @@ export default function ClientDetailClient({
                 </Link>
                 <CopyDemoLink flowId={f.id} />
                 <button
-                  onClick={() => deleteFlow(f.id, f.name)}
-                  className="p-2 rounded-lg text-sm"
+                  onClick={() => duplicateFlow(f.id, f.name)}
+                  disabled={duplicating === f.id}
+                  className="p-2 rounded-lg text-sm disabled:opacity-40"
                   style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
-                  title="Delete flow"
+                  title={duplicating === f.id ? "Duplicating…" : "Duplicate flow"}
                 >
-                  🗑
+                  {duplicating === f.id ? "..." : "⧉"}
+                </button>
+                <button
+                  onClick={() => deleteFlow(f.id, f.name)}
+                  disabled={deleting === f.id}
+                  className="p-2 rounded-lg text-sm disabled:opacity-40"
+                  style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
+                  title={deleting === f.id ? "Deleting…" : "Delete flow"}
+                >
+                  {deleting === f.id ? "..." : "🗑"}
                 </button>
               </div>
             </div>

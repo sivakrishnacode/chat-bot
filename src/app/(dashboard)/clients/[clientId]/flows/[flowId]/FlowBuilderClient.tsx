@@ -99,6 +99,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [linkCopying, setLinkCopying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
 
@@ -332,6 +333,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
 
         <button
           onClick={async () => {
+            setLinkCopying(true);
             const url = `${window.location.origin}/demo/${flow.id}`;
             try {
               await navigator.clipboard.writeText(url);
@@ -345,17 +347,19 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
               document.execCommand("copy");
               document.body.removeChild(ta);
             }
+            setLinkCopying(false);
             setLinkCopied(true);
             setTimeout(() => setLinkCopied(false), 2000);
           }}
-          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shrink-0"
+          disabled={linkCopying}
+          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shrink-0 disabled:opacity-40"
           style={{
             color: linkCopied ? "#25d366" : "#94a3b8",
             border: "1px solid rgba(255,255,255,0.08)",
           }}
-          title="Copy demo link"
+          title={linkCopying ? "Copying…" : linkCopied ? "Copied!" : "Copy demo link"}
         >
-          {linkCopied ? "\u2713 Copied" : "\uD83D\uDD17 Link"}
+          {linkCopying ? "..." : linkCopied ? "\u2713 Copied" : "\uD83D\uDD17 Link"}
         </button>
 
         <button
