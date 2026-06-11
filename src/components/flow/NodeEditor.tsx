@@ -22,20 +22,16 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplica
   const [keyError, setKeyError] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [autoSaving, setAutoSaving] = useState(false);
-  const initialized = useRef(false);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!node) return;
-    if (!initialized.current) {
-      initialized.current = true;
-      setTitle(node.title);
-      setNodeKey(node.key);
-      setMessage(node.message);
-      setReplies([...node.replies]);
-      setTargets([...node.targets]);
-      setKeyError("");
-    }
+    setTitle(node.title);
+    setNodeKey(node.key);
+    setMessage(node.message);
+    setReplies([...node.replies]);
+    setTargets([...node.targets]);
+    setKeyError("");
   }, [node?.key]);
 
   function triggerAutoSave() {
