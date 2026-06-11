@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FlowNode } from "@/lib/types";
 
 interface Props {
@@ -21,16 +21,44 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplica
   const [targets, setTargets] = useState<string[]>([]);
   const [keyError, setKeyError] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const initialized = useRef(false);
+  const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!node) return;
-    setTitle(node.title);
-    setNodeKey(node.key);
-    setMessage(node.message);
-    setReplies([...node.replies]);
-    setTargets([...node.targets]);
-    setKeyError("");
+    if (!initialized.current) {
+      initialized.current = true;
+      setTitle(node.title);
+      setNodeKey(node.key);
+      setMessage(node.message);
+      setReplies([...node.replies]);
+      setTargets([...node.targets]);
+      setKeyError("");
+    }
   }, [node?.key]);
+
+  function triggerAutoSave() {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      if (!node || keyError || !nodeKey.trim()) return;
+      const len = Math.max(replies.length, targets.length);
+      const safeReplies = Array.from({ length: len }, (_, i) => replies[i] ?? "");
+      const safeTargets = Array.from({ length: len }, (_, i) => targets[i] ?? "");
+      const filteredReplies = safeReplies.filter((r) => r.trim());
+      const filteredTargets = safeTargets.slice(0, filteredReplies.length);
+      onSave({
+        ...node,
+        key: nodeKey.trim(),
+        title,
+        message,
+        replies: filteredReplies,
+        targets: filteredTargets,
+      });
+    }, 500);
+  }
+
+  useEffect(() => { triggerAutoSave(); }, [title, message, nodeKey, replies, targets]);
+  useEffect(() => () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); }, []);
 
   if (!node) {
     return (
