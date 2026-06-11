@@ -18,7 +18,7 @@ import {
   applyEdgeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { FlowNode, BotFlow } from "@/lib/types";
 import BotNodeComponent, { BotNodeData } from "@/components/flow/BotNode";
@@ -30,7 +30,7 @@ const nodeTypes = { botNode: BotNodeComponent };
 function toRFNode(
   n: FlowNode,
   isStart: boolean,
-  onSelect: (key: string) => void
+  onSelect: (key: string) => void,
 ): Node {
   return {
     id: n.key,
@@ -86,6 +86,7 @@ function autoLayout(nodes: FlowNode[]): FlowNode[] {
 }
 
 function FlowCanvas({ flow }: { flow: BotFlow }) {
+  const router = useRouter();
   const initialNodes = useMemo(() => {
     const needsLayout = flow.nodes.every((n) => n.posX === 0 && n.posY === 0);
     return needsLayout && flow.nodes.length > 0 ? autoLayout(flow.nodes) : flow.nodes;
@@ -102,6 +103,9 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   const [linkCopying, setLinkCopying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const exitTargetRef = useRef<string | null>(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -109,6 +113,28 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  useEffect(() => {
+    function handlePopState() {
+      if (isDirty) {
+        window.history.pushState(null, "", window.location.href);
+        exitTargetRef.current = document.referrer || `/clients/${flow.clientId}`;
+        setShowExitModal(true);
+      }
+    }
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isDirty, flow.clientId]);
 
   const onSelectRef = useRef<(key: string) => void>(() => {});
   const selectNode = useCallback((key: string) => {
@@ -168,6 +194,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
             : n
         )
       );
+      setIsDirty(true);
     },
     []
   );
@@ -183,6 +210,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
           return { ...n, replies, targets };
         })
       );
+      setIsDirty(true);
     },
     []
   );
@@ -211,6 +239,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
       );
       if (!res.ok) throw new Error("Save failed");
       setSaveMsg("Saved \u2713");
+      setIsDirty(false);
     } catch {
       setSaveMsg("Save failed \u2717");
     } finally {
@@ -242,11 +271,13 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
       updatedAt: new Date().toISOString(),
     };
     setLocalNodes((prev) => [...prev, newNode]);
+    setIsDirty(true);
     setSelectedKey(key.trim());
   }
 
   function handleAutoLayout() {
     setLocalNodes((prev) => autoLayout(prev));
+    setIsDirty(true);
   }
 
   const selectedNodeData = localNodes.find((n) => n.key === selectedKey) ?? null;
@@ -255,6 +286,45 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
     setLocalNodes((prev) =>
       prev.map((n) => (n.key === updated.key ? { ...n, ...updated } : n))
     );
+    setIsDirty(true);
+  }
+
+  function handleDuplicateNode(key: string) {
+    const node = localNodes.find((n) => n.key === key);
+    if (!node) return;
+    let newKey = `${key}_copy`;
+    let i = 1;
+    while (localNodes.find((n) => n.key === newKey)) {
+      newKey = `${key}_copy${i}`;
+      i++;
+    }
+    const dup: FlowNode = {
+      ...node,
+      id: "",
+      key: newKey,
+      title: `${node.title} (copy)`,
+      posX: node.posX + 30,
+      posY: node.posY + 30,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setLocalNodes((prev) => [...prev, dup]);
+    setIsDirty(true);
+    setSelectedKey(newKey);
+  }
+
+  function handleUpdateNodeId(oldKey: string, newKey: string) {
+    if (!newKey.trim() || newKey.trim() === oldKey) return;
+    if (localNodes.find((n) => n.key === newKey.trim())) return;
+    setLocalNodes((prev) =>
+      prev.map((n) => ({
+        ...n,
+        key: n.key === oldKey ? newKey.trim() : n.key,
+        targets: n.targets.map((t) => (t === oldKey ? newKey.trim() : t)),
+      }))
+    );
+    setIsDirty(true);
+    setSelectedKey(newKey.trim());
   }
 
   function handleEditorDelete(key: string) {
@@ -266,7 +336,42 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
         targets: n.targets.map((t) => (t === key ? "" : t)),
       }));
     });
+    setIsDirty(true);
     setSelectedKey(localNodes.find((n) => n.key !== key)?.key ?? null);
+  }
+
+  function handleBack() {
+    if (isDirty) {
+      exitTargetRef.current = `/clients/${flow.clientId}`;
+      setShowExitModal(true);
+    } else {
+      router.push(`/clients/${flow.clientId}`);
+    }
+  }
+
+  async function handleExitSave() {
+    setSaving(true);
+    const posMap = new Map(rfNodes.map((n) => [n.id, n.position]));
+    const toSave = localNodes.map((n) => {
+      const pos = posMap.get(n.key);
+      return { ...n, posX: pos ? Math.round(pos.x) : n.posX, posY: pos ? Math.round(pos.y) : n.posY, isStart: n.key === startKey };
+    });
+    try {
+      await fetch(`/api/clients/${flow.clientId}/flows/${flow.id}/nodes`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nodes: toSave }),
+      });
+    } catch {}
+    setIsDirty(false);
+    setShowExitModal(false);
+    router.push(exitTargetRef.current || `/clients/${flow.clientId}`);
+  }
+
+  function handleExitDiscard() {
+    setIsDirty(false);
+    setShowExitModal(false);
+    router.push(exitTargetRef.current || `/clients/${flow.clientId}`);
   }
 
   return (
@@ -278,13 +383,13 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
           borderColor: "rgba(255,255,255,0.06)",
         }}
       >
-        <Link
-          href={`/clients/${flow.clientId}`}
+        <button
+          onClick={handleBack}
           className="text-xs px-2 py-1 rounded shrink-0"
-          style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
+          style={{ color: "#64748b", background: "rgba(255,255,255,0.04)", border: "none", cursor: "pointer" }}
         >
           ← Back
-        </Link>
+        </button>
 
         <div className="h-4 w-px shrink-0" style={{ background: "rgba(255,255,255,0.08)" }} />
 
@@ -452,6 +557,8 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
               allNodes={localNodes}
               onSave={handleEditorSave}
               onDelete={handleEditorDelete}
+              onDuplicate={handleDuplicateNode}
+              onUpdateId={handleUpdateNodeId}
               onClose={() => setSelectedKey(null)}
             />
           </div>
@@ -477,6 +584,8 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
               allNodes={localNodes}
               onSave={handleEditorSave}
               onDelete={handleEditorDelete}
+              onDuplicate={handleDuplicateNode}
+              onUpdateId={handleUpdateNodeId}
               onClose={() => setEditorOpen(false)}
             />
           </div>
@@ -496,6 +605,42 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
             startKey={startKey}
             onClose={() => setShowSim(false)}
           />
+        </div>
+      )}
+
+      {showExitModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="rounded-xl p-6 w-full max-w-sm shadow-2xl" style={{ background: "#111827" }}>
+            <h2 className="text-base font-semibold mb-2">Unsaved changes</h2>
+            <p className="text-sm mb-5" style={{ color: "#94a3b8" }}>
+              You have unsaved changes. What would you like to do?
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleExitSave}
+                disabled={saving}
+                className="w-full py-2 rounded-lg text-sm font-semibold disabled:opacity-40"
+                style={{ background: "#1d4ed8", color: "#fff" }}
+              >
+                {saving ? "Saving…" : "Save & Leave"}
+              </button>
+              <button
+                onClick={handleExitDiscard}
+                disabled={saving}
+                className="w-full py-2 rounded-lg text-sm"
+                style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+              >
+                Discard Changes
+              </button>
+              <button
+                onClick={() => setShowExitModal(false)}
+                className="w-full py-2 rounded-lg text-sm border"
+                style={{ borderColor: "rgba(255,255,255,0.08)", color: "#94a3b8" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

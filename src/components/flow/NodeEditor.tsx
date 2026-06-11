@@ -1,6 +1,4 @@
 "use client";
-// src/components/flow/NodeEditor.tsx
-// Right-panel editor for the currently selected FlowNode.
 
 import { useEffect, useState } from "react";
 import { FlowNode } from "@/lib/types";
@@ -10,21 +8,28 @@ interface Props {
   allNodes: FlowNode[];
   onSave: (updated: FlowNode) => void;
   onDelete: (key: string) => void;
+  onDuplicate: (key: string) => void;
+  onUpdateId: (oldKey: string, newKey: string) => void;
   onClose: () => void;
 }
 
-export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }: Props) {
+export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplicate, onUpdateId, onClose }: Props) {
   const [title, setTitle] = useState("");
+  const [nodeKey, setNodeKey] = useState("");
   const [message, setMessage] = useState("");
   const [replies, setReplies] = useState<string[]>([]);
   const [targets, setTargets] = useState<string[]>([]);
+  const [keyError, setKeyError] = useState("");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!node) return;
     setTitle(node.title);
+    setNodeKey(node.key);
     setMessage(node.message);
     setReplies([...node.replies]);
     setTargets([...node.targets]);
+    setKeyError("");
   }, [node?.key]);
 
   if (!node) {
@@ -39,18 +44,40 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }
     );
   }
 
+  function handleKeyChange(value: string) {
+    setNodeKey(value);
+    if (!value.trim()) {
+      setKeyError("Key is required");
+    } else if (value !== node!.key && allNodes.find((n) => n.key === value.trim())) {
+      setKeyError(`Key "${value}" already exists`);
+    } else {
+      setKeyError("");
+    }
+  }
+
   function handleSave() {
     if (!node) return;
-    // Sync replies and targets arrays to same length
+    if (!nodeKey.trim()) return;
+    if (keyError) return;
+
     const len = Math.max(replies.length, targets.length);
     const safeReplies = Array.from({ length: len }, (_, i) => replies[i] ?? "");
     const safeTargets = Array.from({ length: len }, (_, i) => targets[i] ?? "");
+
+    const filteredReplies = safeReplies.filter((r) => r.trim());
+    const filteredTargets = safeTargets.slice(0, filteredReplies.length);
+
+    if (nodeKey.trim() !== node.key) {
+      onUpdateId(node.key, nodeKey.trim());
+    }
+
     onSave({
       ...node,
+      key: nodeKey.trim(),
       title,
       message,
-      replies: safeReplies.filter((r) => r.trim()),
-      targets: safeTargets.slice(0, safeReplies.filter((r) => r.trim()).length),
+      replies: filteredReplies,
+      targets: filteredTargets,
     });
   }
 
@@ -64,29 +91,55 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }
     setTargets((t) => t.filter((_, idx) => idx !== i));
   }
 
+  function moveItem(from: number, to: number) {
+    if (from === to) return;
+    setReplies((prev) => {
+      const arr = [...prev];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
+    });
+    setTargets((prev) => {
+      const arr = [...prev];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
+    });
+  }
+
   const keyOptions = allNodes.filter((n) => n.key !== node.key).map((n) => n.key);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 border-b shrink-0"
         style={{ borderColor: "rgba(255,255,255,0.06)" }}
       >
         <div>
           <div className="text-sm font-semibold">Edit Node</div>
-          <div className="text-xs mt-0.5" style={{ color: "#64748b", fontFamily: "monospace" }}>
-            {node.key}
-          </div>
         </div>
         <button onClick={onClose} style={{ color: "#64748b", fontSize: 18 }}>
           ×
         </button>
       </div>
 
-      {/* Body */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
-        {/* Title */}
+        <Field label="Node ID">
+          <input
+            value={nodeKey}
+            onChange={(e) => handleKeyChange(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border text-sm outline-none font-mono"
+            style={{
+              ...inputStyle,
+              borderColor: keyError ? "#ef4444" : "rgba(255,255,255,0.08)",
+            }}
+            placeholder="unique_node_key"
+          />
+          {keyError && (
+            <div className="text-xs mt-1" style={{ color: "#ef4444" }}>{keyError}</div>
+          )}
+        </Field>
+
         <Field label="Title">
           <input
             value={title}
@@ -96,7 +149,6 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }
           />
         </Field>
 
-        {/* Message */}
         <Field label="Bot Message">
           <textarea
             value={message}
@@ -108,11 +160,8 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }
           />
         </Field>
 
-        {/* Quick Replies */}
         <div>
-          <div
-            className="flex items-center justify-between mb-2"
-          >
+          <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-medium" style={{ color: "#94a3b8" }}>
               Quick Replies & Targets
             </label>
@@ -127,35 +176,58 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }
 
           <div className="flex flex-col gap-2">
             {replies.map((r, i) => (
-              <div key={i} className="flex flex-col gap-1.5 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div
+                key={i}
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (dragIndex !== null && dragIndex !== i) moveItem(dragIndex, i);
+                  setDragIndex(i);
+                }}
+                onDragEnd={() => setDragIndex(null)}
+                style={{
+                  opacity: dragIndex === i ? 0.4 : 1,
+                  transition: "opacity 0.15s",
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  borderRadius: 8,
+                  padding: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                  cursor: "grab",
+                }}
+              >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: "#64748b", minWidth: 16 }}>{i + 1}.</span>
+                  <span style={{ color: "#64748b", fontSize: 14, cursor: "grab", userSelect: "none" }}>⠿</span>
+                  <span className="text-xs" style={{ color: "#64748b", minWidth: 12 }}>{i + 1}.</span>
                   <input
                     value={r}
                     onChange={(e) => setReplies((arr) => arr.map((x, idx) => idx === i ? e.target.value : x))}
                     placeholder="Reply label"
                     className="flex-1 px-2 py-1.5 rounded text-xs border outline-none"
-                    style={inputStyle}
+                    style={{ ...inputStyle, minWidth: 0 }}
                   />
                   <button
                     onClick={() => removeReply(i)}
-                    className="text-xs px-1.5 py-1 rounded"
+                    className="text-xs px-1.5 py-1 rounded flex-shrink-0"
                     style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)" }}
                   >
                     ✕
                   </button>
                 </div>
-                <div className="flex items-center gap-2 pl-5">
+                <div className="flex items-center gap-2" style={{ paddingLeft: 24 }}>
                   <span className="text-xs" style={{ color: "#475569" }}>→</span>
                   <select
                     value={targets[i] ?? ""}
                     onChange={(e) => setTargets((arr) => arr.map((x, idx) => idx === i ? e.target.value : x))}
                     className="flex-1 px-2 py-1.5 rounded text-xs border outline-none"
-                    style={{ ...inputStyle, cursor: "pointer" }}
+                    style={{ background: "#1a2133", color: "#e2e8f0", borderColor: "rgba(255,255,255,0.15)", cursor: "pointer" }}
                   >
-                    <option value="">— no target —</option>
+                    <option value="" style={{ background: "#1a2133", color: "#94a3b8" }}>— no target —</option>
                     {keyOptions.map((k) => (
-                      <option key={k} value={k}>{k}</option>
+                      <option key={k} value={k} style={{ background: "#1a2133", color: "#e2e8f0" }}>{k}</option>
                     ))}
                   </select>
                 </div>
@@ -171,17 +243,24 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onClose }
         </div>
       </div>
 
-      {/* Footer buttons */}
       <div
         className="flex items-center gap-2 px-4 py-3 border-t shrink-0"
         style={{ borderColor: "rgba(255,255,255,0.06)" }}
       >
         <button
           onClick={handleSave}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold"
+          disabled={!!keyError || !nodeKey.trim()}
+          className="flex-1 py-2 rounded-lg text-sm font-semibold disabled:opacity-40"
           style={{ background: "#25d366", color: "#000" }}
         >
           Save Node
+        </button>
+        <button
+          onClick={() => onDuplicate(node.key)}
+          className="px-3 py-2 rounded-lg text-sm"
+          style={{ background: "rgba(6,182,212,0.1)", color: "#06b6d4", border: "1px solid rgba(6,182,212,0.2)" }}
+        >
+          ⧉ Duplicate
         </button>
         <button
           onClick={() => onDelete(node.key)}

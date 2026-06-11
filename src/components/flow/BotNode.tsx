@@ -1,6 +1,4 @@
 "use client";
-// src/components/flow/BotNode.tsx
-// Custom node rendered on the ReactFlow canvas.
 
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
@@ -44,7 +42,6 @@ function BotNode({ data, selected }: NodeProps) {
         overflow: "hidden",
       }}
     >
-      {/* Target handle (input) — top (always rendered — start nodes can be targets too) */}
       <Handle
         id="target-in"
         type="target"
@@ -57,7 +54,6 @@ function BotNode({ data, selected }: NodeProps) {
         }}
       />
 
-      {/* Header */}
       <div
         style={{
           padding: "10px 12px 8px",
@@ -99,7 +95,6 @@ function BotNode({ data, selected }: NodeProps) {
         </span>
       </div>
 
-      {/* Message preview */}
       <div
         style={{
           padding: "8px 12px",
@@ -119,7 +114,6 @@ function BotNode({ data, selected }: NodeProps) {
         {d.message.length > 140 && "…"}
       </div>
 
-      {/* Quick replies */}
       {d.replies.length > 0 && (
         <div
           style={{
@@ -148,7 +142,6 @@ function BotNode({ data, selected }: NodeProps) {
         </div>
       )}
 
-      {/* Source handle (output) — bottom */}
       <Handle
         id="source-out"
         type="source"
