@@ -109,6 +109,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   const lastSavedNodesRef = useRef<string>(JSON.stringify(initialNodes));
   const localNodesRef = useRef(localNodes);
   localNodesRef.current = localNodes;
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   function hasUnsavedChanges() {
     return JSON.stringify(localNodesRef.current) !== lastSavedNodesRef.current;
@@ -288,6 +289,85 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
     setIsDirty(true);
   }
 
+  function handleExport() {
+    const data = {
+      name: flow.name,
+      description: flow.description,
+      exportedAt: new Date().toISOString(),
+      nodes: localNodes.map((n) => ({
+        key: n.key,
+        title: n.title,
+        message: n.message,
+        replies: n.replies,
+        targets: n.targets,
+        isStart: n.key === startKey,
+        posX: n.posX,
+        posY: n.posY,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${flow.name.replace(/\s+/g, "_")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        if (!data.nodes || !Array.isArray(data.nodes)) {
+          alert("Invalid file: missing \"nodes\" array");
+          return;
+        }
+        const imported = data.nodes as Array<{
+          key: string; title: string; message: string;
+          replies: string[]; targets: string[];
+          isStart?: boolean; posX?: number; posY?: number;
+        }>;
+        if (imported.length === 0) {
+          alert("Imported flow has no nodes");
+          return;
+        }
+        const keys = imported.map((n) => n.key);
+        if (new Set(keys).size !== keys.length) {
+          alert("Invalid file: duplicate node keys");
+          return;
+        }
+        if (!confirm(`Replace current flow (${localNodes.length} nodes) with imported flow (${imported.length} nodes)?`)) return;
+        const now = new Date().toISOString();
+        setLocalNodes(
+          imported.map((n) => ({
+            id: "",
+            key: n.key,
+            title: n.title || n.key,
+            message: n.message || "",
+            replies: n.replies || [],
+            targets: n.targets || [],
+            isStart: n.isStart ?? false,
+            posX: n.posX ?? 0,
+            posY: n.posY ?? 0,
+            flowId: flow.id,
+            createdAt: now,
+            updatedAt: now,
+          }))
+        );
+        setIsDirty(true);
+      } catch {
+        alert("Invalid JSON file");
+      }
+    };
+    reader.readAsText(file);
+    if (importInputRef.current) importInputRef.current.value = "";
+  }
+
   const selectedNodeData = localNodes.find((n) => n.key === selectedKey) ?? null;
 
   function handleEditorSave(updated: FlowNode) {
@@ -447,6 +527,22 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
         </button>
 
         <button
+          onClick={handleExport}
+          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shrink-0"
+          style={{ background: "rgba(139,92,246,0.1)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.2)" }}
+        >
+          Export
+        </button>
+
+        <button
+          onClick={() => importInputRef.current?.click()}
+          className="text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shrink-0"
+          style={{ background: "rgba(139,92,246,0.1)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.2)" }}
+        >
+          Import
+        </button>
+
+        <button
           onClick={async () => {
             setLinkCopying(true);
             const url = `${window.location.origin}/demo/${flow.id}`;
@@ -493,6 +589,14 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
         >
           {saving ? "Saving\u2026" : "Save"}
         </button>
+
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          style={{ display: "none" }}
+          onChange={handleImportFile}
+        />
       </div>
 
       <div className="flex flex-1 overflow-hidden">
