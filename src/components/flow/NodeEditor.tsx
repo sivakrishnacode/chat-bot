@@ -21,6 +21,7 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplica
   const [targets, setTargets] = useState<string[]>([]);
   const [keyError, setKeyError] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [autoSaving, setAutoSaving] = useState(false);
   const initialized = useRef(false);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
 
@@ -46,6 +47,7 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplica
       const safeTargets = Array.from({ length: len }, (_, i) => targets[i] ?? "");
       const filteredReplies = safeReplies.filter((r) => r.trim());
       const filteredTargets = safeTargets.slice(0, filteredReplies.length);
+      setAutoSaving(true);
       onSave({
         ...node,
         key: nodeKey.trim(),
@@ -54,6 +56,7 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplica
         replies: filteredReplies,
         targets: filteredTargets,
       });
+      setAutoSaving(false);
     }, 500);
   }
 
@@ -277,11 +280,11 @@ export default function NodeEditor({ node, allNodes, onSave, onDelete, onDuplica
       >
         <button
           onClick={handleSave}
-          disabled={!!keyError || !nodeKey.trim()}
+          disabled={!!keyError || !nodeKey.trim() || autoSaving}
           className="flex-1 py-2 rounded-lg text-sm font-semibold disabled:opacity-40"
           style={{ background: "#25d366", color: "#000" }}
         >
-          Save Node
+          {autoSaving ? "Saving…" : "Save Node"}
         </button>
         <button
           onClick={() => onDuplicate(node.key)}
