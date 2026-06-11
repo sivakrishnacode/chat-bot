@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -22,13 +22,35 @@ interface ClientDetail {
   flows: FlowSummary[];
 }
 
-function CopyDemoLink({ flowId }: { flowId: string }) {
+function FlowCardMenu({
+  flow,
+  clientId,
+  onUpdate,
+  onDuplicate,
+  onDelete,
+}: {
+  flow: FlowSummary;
+  clientId: string;
+  onUpdate: (flow: FlowSummary) => void;
+  onDuplicate: (flowId: string, name: string) => void;
+  onDelete: (flowId: string, name: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copying, setCopying] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   async function handleCopy() {
     setCopying(true);
-    const url = `${window.location.origin}/demo/${flowId}`;
+    const url = `${window.location.origin}/demo/${flow.id}`;
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -43,22 +65,70 @@ function CopyDemoLink({ flowId }: { flowId: string }) {
     }
     setCopying(false);
     setCopied(true);
+    setOpen(false);
     setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <button
-      onClick={handleCopy}
-      disabled={copying}
-      className="p-2 rounded-lg text-sm disabled:opacity-40"
-      style={{
-        color: copied ? "#25d366" : "#64748b",
-        background: "rgba(255,255,255,0.04)",
-      }}
-      title={copying ? "Copying…" : copied ? "Copied!" : "Copy demo link"}
-    >
-      {copying ? "..." : copied ? "\u2713" : "\uD83D\uDD17"}
-    </button>
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="p-2 rounded-lg text-sm"
+        style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
+        title="More actions"
+      >
+        ⋯
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 z-50 min-w-40 rounded-lg border py-1 shadow-xl"
+          style={{ background: "#1a2133", borderColor: "rgba(255,255,255,0.08)" }}
+        >
+          <button
+            onClick={() => {
+              setOpen(false);
+              onUpdate(flow);
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:opacity-80"
+            style={{ color: "#e2e8f0" }}
+          >
+            ✏️ Update
+          </button>
+          <button
+            onClick={handleCopy}
+            disabled={copying}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:opacity-80 disabled:opacity-40"
+            style={{ color: copied ? "#25d366" : "#e2e8f0" }}
+          >
+            {copying ? "..." : copied ? "✓ Copied" : "🔗 Copy Link"}
+          </button>
+          <button
+            onClick={() => {
+              setOpen(false);
+              onDuplicate(flow.id, flow.name);
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:opacity-80"
+            style={{ color: "#e2e8f0" }}
+          >
+            ⧉ Duplicate
+          </button>
+          <div
+            className="my-1 mx-2 h-px"
+            style={{ background: "rgba(255,255,255,0.06)" }}
+          />
+          <button
+            onClick={() => {
+              setOpen(false);
+              onDelete(flow.id, flow.name);
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:opacity-80"
+            style={{ color: "#ef4444" }}
+          >
+            🗑 Delete
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -75,6 +145,10 @@ export default function ClientDetailClient({
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [updating, setUpdating] = useState<FlowSummary | null>(null);
+  const [updateName, setUpdateName] = useState("");
+  const [updateDesc, setUpdateDesc] = useState("");
+  const [savingUpdate, setSavingUpdate] = useState(false);
   const [duplicating, setDuplicating] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -92,6 +166,26 @@ export default function ClientDetailClient({
     setNewName("");
     setNewDesc("");
     router.push(`/clients/${clientId}/flows/${flow.id}`);
+  }
+
+  async function updateFlow() {
+    if (!updating || !updateName.trim()) return;
+    setSavingUpdate(true);
+    await fetch(`/api/clients/${clientId}/flows/${updating.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: updateName.trim(), description: updateDesc }),
+    });
+    setClient((prev) => ({
+      ...prev,
+      flows: prev.flows.map((f) =>
+        f.id === updating.id
+          ? { ...f, name: updateName.trim(), description: updateDesc }
+          : f
+      ),
+    }));
+    setSavingUpdate(false);
+    setUpdating(null);
   }
 
   async function duplicateFlow(flowId: string, name: string) {
@@ -255,6 +349,72 @@ export default function ClientDetailClient({
         </div>
       )}
 
+      {/* Update Flow modal */}
+      {updating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div
+            className="rounded-xl p-6 w-full max-w-md shadow-2xl"
+            style={{ background: "#111827" }}
+          >
+            <h2 className="text-lg font-semibold mb-4">Update Flow</h2>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block text-xs mb-1" style={{ color: "#94a3b8" }}>
+                  Flow Name *
+                </label>
+                <input
+                  value={updateName}
+                  onChange={(e) => setUpdateName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
+                  style={{
+                    background: "#1a2133",
+                    borderColor: "rgba(255,255,255,0.08)",
+                    color: "#e2e8f0",
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && updateFlow()}
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: "#94a3b8" }}>
+                  Description
+                </label>
+                <input
+                  value={updateDesc}
+                  onChange={(e) => setUpdateDesc(e.target.value)}
+                  placeholder="Optional short description"
+                  className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
+                  style={{
+                    background: "#1a2133",
+                    borderColor: "rgba(255,255,255,0.08)",
+                    color: "#e2e8f0",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={updateFlow}
+                disabled={savingUpdate || !updateName.trim()}
+                className="flex-1 py-2 rounded-lg font-semibold text-sm disabled:opacity-40"
+                style={{ background: "#2563eb", color: "#fff" }}
+              >
+                {savingUpdate ? "Saving…" : "Save"}
+              </button>
+              <button
+                onClick={() => setUpdating(null)}
+                className="px-4 py-2 rounded-lg text-sm border"
+                style={{
+                  borderColor: "rgba(255,255,255,0.08)",
+                  color: "#94a3b8",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Flow cards */}
       {client.flows.length === 0 ? (
         <div
@@ -297,25 +457,17 @@ export default function ClientDetailClient({
                 >
                   Open Builder
                 </Link>
-                <CopyDemoLink flowId={f.id} />
-                <button
-                  onClick={() => duplicateFlow(f.id, f.name)}
-                  disabled={duplicating === f.id}
-                  className="p-2 rounded-lg text-sm disabled:opacity-40"
-                  style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
-                  title={duplicating === f.id ? "Duplicating…" : "Duplicate flow"}
-                >
-                  {duplicating === f.id ? "..." : "⧉"}
-                </button>
-                <button
-                  onClick={() => deleteFlow(f.id, f.name)}
-                  disabled={deleting === f.id}
-                  className="p-2 rounded-lg text-sm disabled:opacity-40"
-                  style={{ color: "#64748b", background: "rgba(255,255,255,0.04)" }}
-                  title={deleting === f.id ? "Deleting…" : "Delete flow"}
-                >
-                  {deleting === f.id ? "..." : "🗑"}
-                </button>
+                <FlowCardMenu
+                  flow={f}
+                  clientId={clientId}
+                  onUpdate={(flow) => {
+                    setUpdateName(flow.name);
+                    setUpdateDesc(flow.description ?? "");
+                    setUpdating(flow);
+                  }}
+                  onDuplicate={duplicateFlow}
+                  onDelete={deleteFlow}
+                />
               </div>
             </div>
           ))}
