@@ -106,6 +106,13 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   const [isDirty, setIsDirty] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const exitTargetRef = useRef<string | null>(null);
+  const lastSavedNodesRef = useRef<string>(JSON.stringify(initialNodes));
+  const localNodesRef = useRef(localNodes);
+  localNodesRef.current = localNodes;
+
+  function hasUnsavedChanges() {
+    return JSON.stringify(localNodesRef.current) !== lastSavedNodesRef.current;
+  }
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -115,17 +122,17 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   }, []);
 
   useEffect(() => {
-    if (!isDirty) return;
     function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (!hasUnsavedChanges()) return;
       e.preventDefault();
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
+  }, []);
 
   useEffect(() => {
     function handlePopState() {
-      if (isDirty) {
+      if (hasUnsavedChanges()) {
         window.history.pushState(null, "", window.location.href);
         exitTargetRef.current = document.referrer || `/clients/${flow.clientId}`;
         setShowExitModal(true);
@@ -134,7 +141,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
     window.history.pushState(null, "", window.location.href);
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [isDirty, flow.clientId]);
+  }, [flow.clientId]);
 
   const onSelectRef = useRef<(key: string) => void>(() => {});
   const selectNode = useCallback((key: string) => {
@@ -240,6 +247,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
       if (!res.ok) throw new Error("Save failed");
       setSaveMsg("Saved \u2713");
       setIsDirty(false);
+      lastSavedNodesRef.current = JSON.stringify(localNodes);
     } catch {
       setSaveMsg("Save failed \u2717");
     } finally {
@@ -341,7 +349,7 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   }
 
   function handleBack() {
-    if (isDirty) {
+    if (hasUnsavedChanges()) {
       exitTargetRef.current = `/clients/${flow.clientId}`;
       setShowExitModal(true);
     } else {
@@ -364,12 +372,14 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
       });
     } catch {}
     setIsDirty(false);
+    lastSavedNodesRef.current = JSON.stringify(localNodes);
     setShowExitModal(false);
     router.push(exitTargetRef.current || `/clients/${flow.clientId}`);
   }
 
   function handleExitDiscard() {
     setIsDirty(false);
+    setLocalNodes(JSON.parse(lastSavedNodesRef.current));
     setShowExitModal(false);
     router.push(exitTargetRef.current || `/clients/${flow.clientId}`);
   }
