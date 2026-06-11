@@ -331,9 +331,20 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
         </button>
 
         <button
-          onClick={() => {
+          onClick={async () => {
             const url = `${window.location.origin}/demo/${flow.id}`;
-            navigator.clipboard.writeText(url);
+            try {
+              await navigator.clipboard.writeText(url);
+            } catch {
+              const ta = document.createElement("textarea");
+              ta.value = url;
+              ta.style.position = "fixed";
+              ta.style.opacity = "0";
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              document.body.removeChild(ta);
+            }
             setLinkCopied(true);
             setTimeout(() => setLinkCopied(false), 2000);
           }}
