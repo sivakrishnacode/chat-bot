@@ -20,6 +20,7 @@ export async function POST(req: Request) {
 
   const client = await prisma.client.create({
     data: { name: name.trim(), industry, email, phone },
+    include: { _count: { select: { flows: true } } },
   });
 
   return NextResponse.json(client, { status: 201 });

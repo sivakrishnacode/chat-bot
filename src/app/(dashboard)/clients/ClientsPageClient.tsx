@@ -17,16 +17,25 @@ export default function ClientsPageClient({
   async function createClient() {
     if (!form.name.trim()) return;
     setSaving(true);
-    const res = await fetch("/api/clients", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const created = await res.json();
-    setForm({ name: "", industry: "", email: "" });
-    setShowNew(false);
-    setSaving(false);
-    setClients((prev) => [created, ...prev]);
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to create client");
+      }
+      const created = await res.json();
+      setForm({ name: "", industry: "", email: "" });
+      setShowNew(false);
+      setClients((prev) => [created, ...prev]);
+    } catch (e) {
+      console.error("createClient error:", e);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
