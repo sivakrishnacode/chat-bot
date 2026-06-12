@@ -35,23 +35,21 @@ model BotFlow {
 }
 
 model FlowNode {
-  id       String   @id @default(cuid())
-  // The human-readable short key used in targets (e.g. "welcome_helio")
-  key      String
-  title    String
-  message  String   @db.Text
-  // Ordered list of quick-reply button labels
-  replies  String[] @default([])
-  // Ordered list of FlowNode.key targets matching replies by index
-  targets  String[] @default([])
-  isStart  Boolean  @default(false)
-  // Position in canvas (optional, for future drag-and-drop)
-  posX     Int      @default(0)
-  posY     Int      @default(0)
-  flowId   String
-  flow     BotFlow  @relation(fields: [flowId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  key        String
+  title      String
+  message    String   @db.Text
+  replies    String[] @default([])
+  targets    String[] @default([])
+  inputType  String   @default("quick_reply") // "quick_reply" | "form"
+  formFields String?  @db.Text              // JSON array of { label, type, required, placeholder }
+  isStart    Boolean  @default(false)
+  posX       Int      @default(0)
+  posY       Int      @default(0)
+  flowId     String
+  flow       BotFlow  @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([flowId, key])
   @@index([flowId])

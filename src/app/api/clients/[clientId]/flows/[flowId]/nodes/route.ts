@@ -10,13 +10,17 @@ export async function GET(_req: Request, { params }: Params) {
     where: { flowId },
     orderBy: { createdAt: "asc" },
   });
-  return NextResponse.json(nodes);
+  const parsed = nodes.map((n) => ({
+    ...n,
+    formFields: n.formFields ? JSON.parse(n.formFields) : null,
+  }));
+  return NextResponse.json(parsed);
 }
 
 export async function POST(req: Request, { params }: Params) {
   const { flowId } = await params;
   const body = await req.json();
-  const { key, title, message, replies, targets, isStart } = body;
+  const { key, title, message, replies, targets, inputType, formFields, isStart } = body;
 
   if (!key?.trim()) {
     return NextResponse.json({ error: "Node key is required" }, { status: 400 });
@@ -31,15 +35,17 @@ export async function POST(req: Request, { params }: Params) {
   }
 
   const node = await prisma.flowNode.create({
-    data: {
-      flowId,
-      key: key.trim(),
-      title: title?.trim() || key,
-      message: message || "",
-      replies: replies || [],
-      targets: targets || [],
-      isStart: isStart ?? false,
-    },
+      data: {
+        flowId,
+        key: key.trim(),
+        title: title?.trim() || key,
+        message: message || "",
+        replies: replies || [],
+        targets: targets || [],
+        inputType: inputType ?? "quick_reply",
+        formFields: formFields ? JSON.stringify(formFields) : null,
+        isStart: isStart ?? false,
+      },
   });
 
   return NextResponse.json(node, { status: 201 });
@@ -74,6 +80,8 @@ export async function PUT(req: Request, { params }: Params) {
         message: string;
         replies: string[];
         targets: string[];
+        inputType?: string;
+        formFields?: Array<Record<string, unknown>>;
         isStart?: boolean;
         posX?: number;
         posY?: number;
@@ -84,6 +92,8 @@ export async function PUT(req: Request, { params }: Params) {
         message: n.message || "",
         replies: n.replies || [],
         targets: n.targets || [],
+        inputType: n.inputType ?? "quick_reply",
+        formFields: n.formFields ? JSON.stringify(n.formFields) : null,
         isStart: n.isStart ?? false,
         posX: n.posX ?? 0,
         posY: n.posY ?? 0,

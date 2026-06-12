@@ -1,8 +1,7 @@
 "use client";
-// src/components/simulator/ChatSimulator.tsx
 
 import { useState, useRef, useEffect } from "react";
-import { FlowNode } from "@/lib/types";
+import { FlowNode, FormField } from "@/lib/types";
 
 interface Props {
   nodes: FlowNode[];
@@ -23,6 +22,8 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typing, setTyping] = useState(false);
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
     if (!node) return;
     setMessages([]);
     setCurrentKey(key);
+    setFormValues({});
     appendBot(node.message, []);
   }
 
@@ -62,6 +64,41 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
     setMessages(newMessages);
 
     if (!targetKey) return;
+    navigateTo(targetKey, newMessages);
+  }
+
+  async function handleFormSubmit() {
+    if (!currentNode || submitting) return;
+    const fields = currentNode.formFields ?? [];
+    // Validate required fields
+    for (const f of fields) {
+      if (f.required && !formValues[f.label]?.trim()) {
+        return;
+      }
+    }
+    setSubmitting(true);
+
+    const formatted = fields
+      .map((f) => `${f.label}: ${formValues[f.label] ?? ""}`)
+      .join("\n");
+
+    const userMsg: ChatMessage = {
+      id: Math.random().toString(36),
+      role: "user",
+      text: formatted,
+    };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setFormValues({});
+
+    const targetKey = currentNode?.targets[0];
+    if (targetKey) {
+      navigateTo(targetKey, newMessages);
+    }
+    setSubmitting(false);
+  }
+
+  function navigateTo(targetKey: string, currentMessages: ChatMessage[]) {
     const next = nodeMap[targetKey];
     if (!next) {
       setTimeout(() => {
@@ -73,11 +110,25 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
       return;
     }
     setCurrentKey(targetKey);
-    appendBot(next.message, newMessages);
+    appendBot(next.message, currentMessages);
+  }
+
+  function updateFormValue(label: string, value: string) {
+    setFormValues((prev) => ({ ...prev, [label]: value }));
+  }
+
+  function isFormValid(fields: FormField[]) {
+    for (const f of fields) {
+      if (f.required && !formValues[f.label]?.trim()) return false;
+    }
+    return true;
   }
 
   const currentNode = currentKey ? nodeMap[currentKey] : null;
-  const canReply = !typing && currentNode && currentNode.replies.length > 0;
+  const isForm = currentNode?.inputType === "form";
+  const formFields: FormField[] = isForm ? (currentNode.formFields ?? []) : [];
+  const hasQuickReplies = !typing && currentNode && currentNode.replies.length > 0 && !isForm;
+  const showForm = !typing && currentNode && isForm;
 
   return (
     <div
@@ -196,52 +247,176 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
       </div>
 
       {/* Quick reply chips */}
-      <div
-        style={{
-          padding: "8px 10px 10px",
-          background: "#111827",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 6,
-          minHeight: 52,
-        }}
-      >
-        {canReply
-          ? currentNode.replies.map((r, i) => (
-              <button
-                key={i}
-                onClick={() =>
-                  handleReply(r, currentNode.targets[i] || undefined)
-                }
-                style={{
-                  fontSize: 12,
-                  padding: "6px 12px",
-                  borderRadius: 16,
-                  border: "1px solid rgba(37,211,102,0.35)",
-                  background: "rgba(37,211,102,0.07)",
-                  color: "#25d366",
-                  cursor: "pointer",
-                  transition: "background 0.12s",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.target as HTMLElement).style.background =
-                    "rgba(37,211,102,0.15)")
-                }
-                onMouseLeave={(e) =>
-                  ((e.target as HTMLElement).style.background =
-                    "rgba(37,211,102,0.07)")
-                }
-              >
-                {r}
-              </button>
-            ))
-          : !typing && (
-              <span style={{ fontSize: 12, color: "#475569", padding: "6px 0" }}>
-                End of flow
-              </span>
-            )}
-      </div>
+      {hasQuickReplies && (
+        <div
+          style={{
+            padding: "8px 10px 10px",
+            background: "#111827",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 6,
+            minHeight: 52,
+          }}
+        >
+          {currentNode.replies.map((r, i) => (
+            <button
+              key={i}
+              onClick={() =>
+                handleReply(r, currentNode.targets[i] || undefined)
+              }
+              style={{
+                fontSize: 12,
+                padding: "6px 12px",
+                borderRadius: 16,
+                border: "1px solid rgba(37,211,102,0.35)",
+                background: "rgba(37,211,102,0.07)",
+                color: "#25d366",
+                cursor: "pointer",
+                transition: "background 0.12s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.target as HTMLElement).style.background =
+                  "rgba(37,211,102,0.15)")
+              }
+              onMouseLeave={(e) =>
+                ((e.target as HTMLElement).style.background =
+                  "rgba(37,211,102,0.07)")
+              }
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Multi-field form */}
+      {showForm && formFields.length > 0 && (
+        <div
+          style={{
+            padding: "10px 12px 10px",
+            background: "#111827",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+            maxHeight: 260,
+            overflowY: "auto",
+          }}
+        >
+          <div className="flex flex-col gap-2">
+            {formFields.map((field, i) => (
+              <div key={i}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    color: "#94a3b8",
+                    marginBottom: 3,
+                    fontWeight: 500,
+                  }}
+                >
+                  {field.label}
+                  {field.required && (
+                    <span style={{ color: "#ef4444", marginLeft: 2 }}>*</span>
+                  )}
+                </label>
+                {field.type === "textarea" ? (
+                  <textarea
+                    value={formValues[field.label] ?? ""}
+                    onChange={(e) => updateFormValue(field.label, e.target.value)}
+                    placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                    rows={2}
+                    style={{
+                      width: "100%",
+                      background: "rgba(255,255,255,0.06)",
+                      border: field.required && !formValues[field.label]?.trim()
+                        ? "1px solid rgba(239,68,68,0.3)"
+                        : "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 10,
+                      padding: "8px 10px",
+                      color: "#e2e8f0",
+                      fontSize: 12,
+                      outline: "none",
+                      resize: "none",
+                      fontFamily: "inherit",
+                      lineHeight: 1.4,
+                    }}
+                  />
+                ) : (
+                  <input
+                    type={field.type}
+                    value={formValues[field.label] ?? ""}
+                    onChange={(e) => updateFormValue(field.label, e.target.value)}
+                    placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && i === formFields.length - 1) {
+                        e.preventDefault();
+                        handleFormSubmit();
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      background: "rgba(255,255,255,0.06)",
+                      border: field.required && !formValues[field.label]?.trim()
+                        ? "1px solid rgba(239,68,68,0.3)"
+                        : "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 10,
+                      padding: "8px 10px",
+                      color: "#e2e8f0",
+                      fontSize: 12,
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+
+            <button
+              onClick={handleFormSubmit}
+              disabled={!isFormValid(formFields) || submitting}
+              style={{
+                width: "100%",
+                padding: "9px 0",
+                borderRadius: 10,
+                background:
+                  isFormValid(formFields) && !submitting
+                    ? "#25d366"
+                    : "rgba(255,255,255,0.08)",
+                border: "none",
+                color:
+                  isFormValid(formFields) && !submitting ? "#000" : "#64748b",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor:
+                  isFormValid(formFields) && !submitting
+                    ? "pointer"
+                    : "default",
+                marginTop: 2,
+              }}
+            >
+              {submitting ? "Sending…" : "Submit"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* End of flow / Restart bar */}
+      {!hasQuickReplies && !showForm && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "6px 12px 10px",
+            background: "#111827",
+            gap: 10,
+          }}
+        >
+          {!typing && (
+            <span style={{ fontSize: 12, color: "#475569", padding: "6px 0" }}>
+              End of flow
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Restart bar */}
       <div
@@ -251,6 +426,7 @@ export default function ChatSimulator({ nodes, startKey, onClose }: Props) {
           padding: "6px 12px 10px",
           background: "#111827",
           gap: 10,
+          borderTop: hasQuickReplies || showForm ? "1px solid rgba(255,255,255,0.05)" : "none",
         }}
       >
         <button

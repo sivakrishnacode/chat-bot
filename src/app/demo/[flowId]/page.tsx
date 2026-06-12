@@ -29,9 +29,14 @@ export default async function Page({
     where: { id: flow.clientId },
   });
 
+  const nodes = JSON.parse(JSON.stringify(flow.nodes)).map((n: Record<string, unknown>) => ({
+    ...n,
+    formFields: typeof n.formFields === "string" ? JSON.parse(n.formFields) : n.formFields ?? null,
+  })) as FlowNode[];
+
   return (
     <DemoPageClient
-      nodes={JSON.parse(JSON.stringify(flow.nodes)) as FlowNode[]}
+      nodes={nodes}
       flowName={flow.name}
       clientName={client?.name ?? null}
     />

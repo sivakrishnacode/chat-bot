@@ -9,6 +9,8 @@ export type BotNodeData = {
   message: string;
   replies: string[];
   targets: string[];
+  inputType?: "quick_reply" | "form";
+  formFields?: Array<{ label: string; type: string; required: boolean }>;
   isSelected?: boolean;
   isStart?: boolean;
   onSelect: (key: string) => void;
@@ -17,6 +19,8 @@ export type BotNodeData = {
 function BotNode({ data, selected }: NodeProps) {
   const d = data as BotNodeData;
   const isStart = d.isStart;
+  const isForm = d.inputType === "form";
+  const fieldCount = d.formFields?.length ?? 0;
 
   return (
     <div
@@ -76,6 +80,20 @@ function BotNode({ data, selected }: NodeProps) {
             }}
           >
             START
+          </span>
+        )}
+        {isForm && (
+          <span
+            style={{
+              fontSize: 10,
+              background: "rgba(139,92,246,0.15)",
+              color: "#a78bfa",
+              fontWeight: 600,
+              padding: "1px 6px",
+              borderRadius: 4,
+            }}
+          >
+            FORM {fieldCount > 0 && <span style={{ opacity: 0.6 }}>({fieldCount})</span>}
           </span>
         )}
         <span style={{ fontSize: 12, fontWeight: 600, flex: 1 }}>

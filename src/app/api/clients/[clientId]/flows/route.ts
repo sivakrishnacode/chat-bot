@@ -12,7 +12,14 @@ export async function GET(
     include: { nodes: { orderBy: { createdAt: "asc" } } },
     orderBy: { createdAt: "desc" },
   });
-  return NextResponse.json(flows);
+  const parsed = flows.map((f) => ({
+    ...f,
+    nodes: f.nodes.map((n: Record<string, unknown>) => ({
+      ...n,
+      formFields: typeof n.formFields === "string" ? JSON.parse(n.formFields) : n.formFields ?? null,
+    })),
+  }));
+  return NextResponse.json(parsed);
 }
 
 export async function POST(

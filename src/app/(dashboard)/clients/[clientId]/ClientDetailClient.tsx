@@ -473,6 +473,8 @@ export default function ClientDetailClient({
           ))}
         </div>
       )}
+
+
     </div>
   );
 }

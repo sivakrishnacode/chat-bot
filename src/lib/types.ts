@@ -1,4 +1,9 @@
-// src/lib/types.ts
+export interface FormField {
+  label: string;
+  type: "text" | "email" | "tel" | "textarea";
+  required: boolean;
+  placeholder: string;
+}
 
 export interface FlowNode {
   id: string;
@@ -7,6 +12,8 @@ export interface FlowNode {
   message: string;
   replies: string[];
   targets: string[];
+  inputType?: "quick_reply" | "form";
+  formFields?: FormField[];
   isStart?: boolean;
   posX: number;
   posY: number;
@@ -38,7 +45,6 @@ export interface Client {
   updatedAt: string;
 }
 
-// Lightweight version for lists (no nodes loaded)
 export interface ClientSummary {
   id: string;
   name: string;

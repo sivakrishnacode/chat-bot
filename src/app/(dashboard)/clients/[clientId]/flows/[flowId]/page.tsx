@@ -25,10 +25,16 @@ export default async function Page({
     );
   }
 
+  const parsed = JSON.parse(JSON.stringify(flow));
+  parsed.nodes = parsed.nodes.map((n: Record<string, unknown>) => ({
+    ...n,
+    formFields: typeof n.formFields === "string" ? JSON.parse(n.formFields) : n.formFields ?? null,
+  }));
+
   return (
     <FlowBuilderClient
       key={flow.id}
-      flow={JSON.parse(JSON.stringify(flow)) as BotFlow}
+      flow={parsed as BotFlow}
     />
   );
 }
