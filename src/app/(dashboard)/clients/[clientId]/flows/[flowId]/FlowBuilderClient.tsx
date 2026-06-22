@@ -292,22 +292,161 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
   }
 
   function handleExport() {
-    const data = {
-      name: flow.name,
-      description: flow.description,
-      exportedAt: new Date().toISOString(),
-      nodes: localNodes.map((n) => ({
-        key: n.key,
-        title: n.title,
-        message: n.message,
-        replies: n.replies,
-        targets: n.targets,
-        isStart: n.key === startKey,
+    // Generate unique IDs for all replies to match row/edge interactiveIds
+    const connectionIds: Record<string, string[]> = {};
+    localNodes.forEach((n) => {
+      connectionIds[n.key] = n.replies.map(() => {
+        if (typeof window !== "undefined" && window.crypto && window.crypto.randomUUID) {
+          return window.crypto.randomUUID();
+        }
+        return Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15);
+      });
+    });
+
+    const nodes = localNodes.map((n) => {
+      const isStart = n.key === startKey;
+      const nodeId = isStart ? "root" : n.key;
+
+      // Find parent connection details
+      let parentNodeId: string | null = null;
+      let parentNodeName: string | null = null;
+      let interactiveId: string | null = null;
+      let keywords: string[] = [];
+
+      if (isStart) {
+        keywords = ["Hey"];
+      } else {
+        let foundParent = false;
+        for (const p of localNodes) {
+          const targetIdx = p.targets.indexOf(n.key);
+          if (targetIdx !== -1) {
+            parentNodeId = p.key === startKey ? "root" : p.key;
+            parentNodeName = p.title || p.key;
+            interactiveId = connectionIds[p.key]?.[targetIdx] || null;
+            keywords = [p.replies[targetIdx] || ""];
+            foundParent = true;
+            break;
+          }
+        }
+        if (!foundParent) {
+          // Fallback if orphan node
+          parentNodeId = "root";
+          parentNodeName = "Welcome";
+          interactiveId = typeof window !== "undefined" && window.crypto && window.crypto.randomUUID
+            ? window.crypto.randomUUID()
+            : Math.random().toString(36).substring(2, 15);
+          keywords = [n.title || n.key];
+        }
+      }
+
+      const hasReplies = n.replies && n.replies.length > 0;
+      const nodeType = hasReplies ? "interactive" : "text";
+      const interactiveType = hasReplies ? "list" : "button";
+
+      // Buttons array has a dummy reply matching WhatsApp interactive format
+      const buttons = [
+        {
+          type: "reply",
+          reply: {
+            title: "Button 1",
+            id: typeof window !== "undefined" && window.crypto && window.crypto.randomUUID
+              ? window.crypto.randomUUID()
+              : Math.random().toString(36).substring(2, 15),
+          },
+        },
+      ];
+
+      const sections = hasReplies
+        ? [
+            {
+              title: n.title || "Options",
+              rows: n.replies.map((reply, i) => ({
+                id: connectionIds[n.key]?.[i] || "",
+                title: reply,
+                description: "",
+              })),
+            },
+          ]
+        : undefined;
+
+      const dataField: any = {
+        interactiveType,
+        body: n.message || "",
+        header: {
+          type: "none",
+        },
+        action: {
+          buttons,
+        },
+      };
+
+      if (sections) {
+        dataField.action.sections = sections;
+        dataField.action.button = n.title || "Options";
+      }
+
+      const nodeObj: any = {
+        nodeId,
+        parentNodeId,
+        parentNodeName,
+        name: n.title || n.key,
+        interactiveId,
+        keywords,
+        type: nodeType,
+        data: dataField,
         posX: n.posX,
         posY: n.posY,
-      })),
+      };
+
+      if (hasReplies) {
+        nodeObj.variableConfig = {
+          dynamic_media: {
+            flag: false,
+            media_url: "",
+          },
+        };
+      }
+
+      return nodeObj;
+    });
+
+    const edges: any[] = [];
+    localNodes.forEach((n) => {
+      n.replies.forEach((reply, i) => {
+        const targetKey = n.targets[i];
+        if (!targetKey || targetKey === "null") return;
+        const targetNode = localNodes.find((tn) => tn.key === targetKey);
+        if (!targetNode) return;
+
+        const fromId = n.key === startKey ? "root" : n.key;
+        const toId = targetKey === startKey ? "root" : targetKey;
+        const connId = connectionIds[n.key]?.[i] || "";
+
+        edges.push({
+          toNodeId: toId,
+          fromNodeId: fromId,
+          intentName: reply,
+          keywords: [reply],
+          nextNodeName: targetNode.title || targetNode.key,
+          interactiveId: connId,
+          edgeId: `${fromId}-${toId}`,
+          sourceHandleId: fromId,
+          targetHandleId: toId,
+          label: reply,
+        });
+      });
+    });
+
+    const exportData = {
+      chatbot: {
+        name: flow.name,
+      },
+      nodes,
+      edges,
+      manualResolution: [],
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -325,28 +464,99 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target?.result as string);
-        if (!data.nodes || !Array.isArray(data.nodes)) {
-          alert("Invalid file: missing \"nodes\" array");
+        
+        // Detect format
+        const isNewFormat = data.chatbot && Array.isArray(data.nodes);
+        const isOldFormat = !data.chatbot && Array.isArray(data.nodes) && data.nodes.length > 0 && ("key" in data.nodes[0]);
+
+        if (!isNewFormat && !isOldFormat) {
+          alert("Invalid file: unrecognized chatbot data structure");
           return;
         }
-        const imported = data.nodes as Array<{
-          key: string; title: string; message: string;
-          replies: string[]; targets: string[];
-          isStart?: boolean; posX?: number; posY?: number;
-        }>;
-        if (imported.length === 0) {
-          alert("Imported flow has no nodes");
-          return;
-        }
-        const keys = imported.map((n) => n.key);
-        if (new Set(keys).size !== keys.length) {
-          alert("Invalid file: duplicate node keys");
-          return;
-        }
-        if (!confirm(`Replace current flow (${localNodes.length} nodes) with imported flow (${imported.length} nodes)?`)) return;
+
+        let importedNodes: FlowNode[] = [];
         const now = new Date().toISOString();
-        setLocalNodes(
-          imported.map((n) => ({
+
+        if (isNewFormat) {
+          const nodesArray = data.nodes;
+          const edgesArray = data.edges || [];
+
+          if (nodesArray.length === 0) {
+            alert("Imported flow has no nodes");
+            return;
+          }
+
+          // Check duplicate nodeIds
+          const ids = nodesArray.map((n: any) => n.nodeId);
+          if (new Set(ids).size !== ids.length) {
+            alert("Invalid file: duplicate nodeIds");
+            return;
+          }
+
+          if (!confirm(`Replace current flow (${localNodes.length} nodes) with imported flow (${nodesArray.length} nodes)?`)) return;
+
+          importedNodes = nodesArray.map((n: any, index: number) => {
+            const nodeId = n.nodeId;
+            const isStart = nodeId === "root" || n.isStart === true || (index === 0 && !nodesArray.some((x: any) => x.nodeId === "root" || x.isStart === true));
+            const key = nodeId;
+
+            const replies: string[] = [];
+            const targets: string[] = [];
+
+            // Find all edges where this node is the source
+            const nodeEdges = edgesArray.filter((e: any) => e.fromNodeId === nodeId);
+
+            // If the node has list sections and rows, extract in order of rows:
+            if (n.data?.action?.sections) {
+              for (const section of n.data.action.sections) {
+                if (section.rows) {
+                  for (const row of section.rows) {
+                    replies.push(row.title || "");
+                    const edge = nodeEdges.find((e: any) => e.interactiveId === row.id) ||
+                                 nodeEdges.find((e: any) => e.label === row.title) ||
+                                 nodeEdges.find((e: any) => e.intentName === row.title);
+                    targets.push(edge ? edge.toNodeId : "");
+                  }
+                }
+              }
+            } else {
+              // Otherwise, just map nodeEdges directly
+              for (const edge of nodeEdges) {
+                replies.push(edge.label || edge.intentName || "");
+                targets.push(edge.toNodeId || "");
+              }
+            }
+
+            return {
+              id: "",
+              key,
+              title: n.name || key,
+              message: n.data?.body || "",
+              replies,
+              targets,
+              isStart,
+              posX: n.posX ?? 0,
+              posY: n.posY ?? 0,
+              flowId: flow.id,
+              createdAt: now,
+              updatedAt: now,
+            } as FlowNode;
+          });
+
+        } else {
+          // Old format fallback
+          const imported = data.nodes;
+          if (imported.length === 0) {
+            alert("Imported flow has no nodes");
+            return;
+          }
+          const keys = imported.map((n: any) => n.key);
+          if (new Set(keys).size !== keys.length) {
+            alert("Invalid file: duplicate node keys");
+            return;
+          }
+          if (!confirm(`Replace current flow (${localNodes.length} nodes) with imported flow (${imported.length} nodes)?`)) return;
+          importedNodes = imported.map((n: any) => ({
             id: "",
             key: n.key,
             title: n.title || n.key,
@@ -359,8 +569,10 @@ function FlowCanvas({ flow }: { flow: BotFlow }) {
             flowId: flow.id,
             createdAt: now,
             updatedAt: now,
-          }))
-        );
+          }));
+        }
+
+        setLocalNodes(importedNodes);
         setIsDirty(true);
       } catch {
         alert("Invalid JSON file");

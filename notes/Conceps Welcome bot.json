@@ -1,0 +1,1200 @@
+{
+  "chatbot": {
+    "name": "Conceps Welcome bot"
+  },
+  "nodes": [
+    {
+      "nodeId": "1d8244ad-a9fd-4069-a80b-8f60311e35a7",
+      "parentNodeId": "b29fb905-bd59-46cf-88d6-54c62490227b",
+      "parentNodeName": "Node-A42A",
+      "name": "Node-A111",
+      "interactiveId": "e430d883-427b-476e-9e92-d9833dd38b95",
+      "keywords": [
+        "All Services "
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "c0381341-f5ba-4ae2-842a-43a148e91d4e"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "2625f149-2692-4e37-a937-bfb415c482ab",
+      "parentNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "parentNodeName": "Node-1414",
+      "name": "Node-B1C3",
+      "interactiveId": "c605fc47-c45e-49ef-b028-c45c67faf57a",
+      "keywords": [
+        "Business Website"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "8a9988de-433e-470a-9aec-6d8b50a7b62f"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "287561e2-7604-43ac-9251-6d599533b21b",
+      "parentNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "parentNodeName": "Node 1234",
+      "name": "Node-CB2C",
+      "interactiveId": "c01d7e44-e411-4eed-b0b2-2ff4bc988d86",
+      "keywords": [
+        "Hybrid App"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "3972eab0-1a06-44fc-83a6-bd1d938e132f"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "4157284a-bc38-49d7-bba9-26e805997972",
+      "parentNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "parentNodeName": "Node-1223",
+      "name": "Node-A34A",
+      "interactiveId": "e8bd654b-4564-4d9c-8993-82d2c8469a68",
+      "keywords": [
+        "SEO"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "f301c341-4d37-42ea-b245-8b4f2bae644c"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "4735e2ec-cad3-4463-b2a7-8438451aa37a",
+      "parentNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "parentNodeName": "Node 1234",
+      "name": "Node-34B3",
+      "interactiveId": "b3b1c0ea-1c5c-411d-aa25-6a79805195ff",
+      "keywords": [
+        "App Maintenance"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "e9105a44-c112-4efc-9e74-117ca324fd53"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "4c791fe6-49ff-47c4-992b-cd7471eb4764",
+      "parentNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "parentNodeName": "Node-1223",
+      "name": "Node-32B3",
+      "interactiveId": "48b062fd-6c86-4b33-a035-131eb9f6e04a",
+      "keywords": [
+        "Social Media Marketing"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "d83b0c67-43af-474e-9c03-6275abfb4c00"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "parentNodeId": "root",
+      "parentNodeName": "Welcome Node",
+      "name": "Node 1234",
+      "interactiveId": "d84bb335-0074-4ed4-b126-3abf6f9f2d03",
+      "keywords": [
+        "Mobile App Development"
+      ],
+      "type": "interactive",
+      "data": {
+        "interactiveType": "list",
+        "body": "Transform Your Business Idea into a High-Performance Mobile App",
+        "header": {
+          "type": "none",
+          "text": ""
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "a3393581-e7c3-4cb0-b09c-9cc519c0bc61"
+              }
+            }
+          ],
+          "sections": [
+            {
+              "title": "App Development",
+              "rows": [
+                {
+                  "id": "26f8fe13-884f-435d-b3e2-f6f9ad9be9df",
+                  "title": "Android App",
+                  "description": ""
+                },
+                {
+                  "id": "dab6f937-df76-471e-85be-1920be05712b",
+                  "title": "iOS App",
+                  "description": ""
+                },
+                {
+                  "id": "c01d7e44-e411-4eed-b0b2-2ff4bc988d86",
+                  "title": "Hybrid App",
+                  "description": ""
+                },
+                {
+                  "id": "b3b1c0ea-1c5c-411d-aa25-6a79805195ff",
+                  "title": "App Maintenance",
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "button": "App Development"
+        }
+      }
+    },
+    {
+      "nodeId": "647a8ebb-181d-4d8c-af61-bc813abe40c0",
+      "parentNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "parentNodeName": "Node-1223",
+      "name": "Node-BA2A",
+      "interactiveId": "05582b9d-f9cc-4174-9b2a-61d6aff77bed",
+      "keywords": [
+        "Google Ads (PPC)"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "cd806316-83b6-45c6-815b-1c01c86b476e"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "71da99aa-dcc4-437b-be5f-046ef38b1dc5",
+      "parentNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "parentNodeName": " Branding & Identity",
+      "name": "Node-2BBB",
+      "interactiveId": "4ff0eeb6-2c96-4667-9d89-2d904c6e5275",
+      "keywords": [
+        "Packaging Design"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "65d58f76-c537-44ff-a0db-fc29a0264f47"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "842c8626-f0c6-41b4-9246-00f4ae097660",
+      "parentNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "parentNodeName": " Branding & Identity",
+      "name": "Node-42A4",
+      "interactiveId": "6a5d8cc4-6029-44d1-a681-5f933cd56f81",
+      "keywords": [
+        "Complete Branding Kit"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "94445821-727e-4bf7-b84f-5d5155c0366e"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "a7f679be-9a3e-48d5-b801-c96b1f6c8bb4",
+      "parentNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "parentNodeName": "Node-1414",
+      "name": "Node-4C43",
+      "interactiveId": "470eece7-2942-410b-b746-273942553863",
+      "keywords": [
+        "Landing Page"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "1e6172ee-ca43-4579-a798-827c320ddda0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "b29fb905-bd59-46cf-88d6-54c62490227b",
+      "parentNodeId": "root",
+      "parentNodeName": "Welcome Node",
+      "name": "Node-A42A",
+      "interactiveId": "63912b42-ca79-4ec1-8b8f-1a86211c1bd8",
+      "keywords": [
+        "All Services "
+      ],
+      "type": "interactive",
+      "data": {
+        "interactiveType": "list",
+        "body": "End-to-End Business Solutions That Drive Growth",
+        "header": {
+          "type": "none",
+          "text": ""
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "da0b41bd-97a9-41e3-8ea6-1af2da7005f2"
+              }
+            }
+          ],
+          "sections": [
+            {
+              "title": "End to End Services",
+              "rows": [
+                {
+                  "id": "e430d883-427b-476e-9e92-d9833dd38b95",
+                  "title": "All Services ",
+                  "description": "Branding + Marketing + Website + App Development"
+                }
+              ]
+            }
+          ],
+          "button": "End to End Services"
+        }
+      },
+      "variableConfig": {
+        "dynamic_media": {
+          "flag": false,
+          "media_url": ""
+        }
+      }
+    },
+    {
+      "nodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "parentNodeId": "root",
+      "parentNodeName": "Welcome Node",
+      "name": " Branding & Identity",
+      "interactiveId": "1e9bac00-62ff-49a2-af0b-76aaedfea52d",
+      "keywords": [
+        " Branding & Identity"
+      ],
+      "type": "interactive",
+      "data": {
+        "interactiveType": "list",
+        "body": "Build a strong and memorable brand with us",
+        "header": {
+          "type": "none",
+          "text": ""
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "fa335942-4b3e-4189-83d4-984297cc8323"
+              }
+            }
+          ],
+          "sections": [
+            {
+              "title": "Branding Services",
+              "rows": [
+                {
+                  "id": "197425ea-2677-4a3a-a995-64620c29bfe9",
+                  "title": "Logo Design",
+                  "description": ""
+                },
+                {
+                  "id": "b0fbf0ac-1b04-4b84-9b3d-17776322c7d5",
+                  "title": "Brand Strategy ",
+                  "description": ""
+                },
+                {
+                  "id": "4ff0eeb6-2c96-4667-9d89-2d904c6e5275",
+                  "title": "Packaging Design",
+                  "description": ""
+                },
+                {
+                  "id": "6a5d8cc4-6029-44d1-a681-5f933cd56f81",
+                  "title": "Complete Branding Kit",
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "button": " Branding & Identity"
+        }
+      }
+    },
+    {
+      "nodeId": "c4e41719-597b-41d2-bd41-038392ad34f2",
+      "parentNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "parentNodeName": " Branding & Identity",
+      "name": "Node-B32B",
+      "interactiveId": "b0fbf0ac-1b04-4b84-9b3d-17776322c7d5",
+      "keywords": [
+        "Brand Strategy "
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "1c987345-51b9-4d0a-a034-9149a109f4ac"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "c82012cb-e211-4628-b954-39a2da6a0896",
+      "parentNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "parentNodeName": "Node-1223",
+      "name": "Node-341A",
+      "interactiveId": "fb87dcc1-82e4-4fe0-bee2-7cc2e2cd93ae",
+      "keywords": [
+        "Content Marketing"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "e4ff2bf9-fccc-41a6-9bb7-3513525a32a3"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "d1e0ed3e-8637-4a27-86aa-32f77f62e5a9",
+      "parentNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "parentNodeName": " Branding & Identity",
+      "name": "Node-32B3",
+      "interactiveId": "197425ea-2677-4a3a-a995-64620c29bfe9",
+      "keywords": [
+        "Logo Design"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "c31a28fc-31f1-4b8e-a155-1bdce0e5519d"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "parentNodeId": "root",
+      "parentNodeName": "Welcome Node",
+      "name": "Node-1414",
+      "interactiveId": "9504fec0-a0c8-4dc2-a92a-6d40e420a592",
+      "keywords": [
+        "Website Development"
+      ],
+      "type": "interactive",
+      "data": {
+        "interactiveType": "list",
+        "body": "Get a High-Performance Website That Converts Visitors into Customers",
+        "header": {
+          "type": "none",
+          "text": ""
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "a3e7093a-3e28-4cb2-8e20-aec78e8e352e"
+              }
+            }
+          ],
+          "sections": [
+            {
+              "title": " Website Development",
+              "rows": [
+                {
+                  "id": "c605fc47-c45e-49ef-b028-c45c67faf57a",
+                  "title": "Business Website",
+                  "description": ""
+                },
+                {
+                  "id": "7dab65c8-ca5a-4080-b140-54cac64b6b8e",
+                  "title": "E-Commerce Website",
+                  "description": ""
+                },
+                {
+                  "id": "470eece7-2942-410b-b746-273942553863",
+                  "title": "Landing Page",
+                  "description": ""
+                },
+                {
+                  "id": "6da8039a-46f1-4132-962e-ed828e5ea4e5",
+                  "title": "Website Redesign",
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "button": " Website Development"
+        }
+      }
+    },
+    {
+      "nodeId": "d9999452-f466-42e5-91b4-6b1279d52111",
+      "parentNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "parentNodeName": "Node 1234",
+      "name": "Node-4341",
+      "interactiveId": "dab6f937-df76-471e-85be-1920be05712b",
+      "keywords": [
+        "iOS App"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "148b1dcb-b507-4382-8766-76b255ac555c"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "parentNodeId": "root",
+      "parentNodeName": "Welcome Node",
+      "name": "Node-1223",
+      "interactiveId": "377ccea2-a81b-4bd3-accb-e1d8a5af5909",
+      "keywords": [
+        "Digital Marketing"
+      ],
+      "type": "interactive",
+      "data": {
+        "interactiveType": "list",
+        "body": "Get More Leads & Sales with Data-Driven Digital Marketing",
+        "header": {
+          "type": "none",
+          "text": ""
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "72b5917b-4ccb-49bb-a802-882003e1901c"
+              }
+            }
+          ],
+          "sections": [
+            {
+              "title": "Digital Marketing",
+              "rows": [
+                {
+                  "id": "e8bd654b-4564-4d9c-8993-82d2c8469a68",
+                  "title": "SEO",
+                  "description": ""
+                },
+                {
+                  "id": "48b062fd-6c86-4b33-a035-131eb9f6e04a",
+                  "title": "Social Media Marketing",
+                  "description": ""
+                },
+                {
+                  "id": "05582b9d-f9cc-4174-9b2a-61d6aff77bed",
+                  "title": "Google Ads (PPC)",
+                  "description": ""
+                },
+                {
+                  "id": "fb87dcc1-82e4-4fe0-bee2-7cc2e2cd93ae",
+                  "title": "Content Marketing",
+                  "description": ""
+                },
+                {
+                  "id": "4a83e4ac-8d94-4e23-a679-4526cb327048",
+                  "title": "All Services",
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "button": "Digital Marketing"
+        }
+      }
+    },
+    {
+      "nodeId": "eae8cdd7-cefc-4684-b717-bb1bd84d3ac9",
+      "parentNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "parentNodeName": "Node-1414",
+      "name": "Node-C23B",
+      "interactiveId": "6da8039a-46f1-4132-962e-ed828e5ea4e5",
+      "keywords": [
+        "Website Redesign"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "90f6c375-1ac8-4b26-b99f-ba7459c32f79"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "efa22592-de28-4a0b-a276-3d9b8a487370",
+      "parentNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "parentNodeName": "Node-1223",
+      "name": "Node-AB44",
+      "interactiveId": "4a83e4ac-8d94-4e23-a679-4526cb327048",
+      "keywords": [
+        "All Services"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "6d952cdf-ebaa-4f1e-990f-1162b943dbbd"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "f0450a57-4de9-4c13-9b08-881068eaf990",
+      "parentNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "parentNodeName": "Node-1414",
+      "name": "Node-3343",
+      "interactiveId": "7dab65c8-ca5a-4080-b140-54cac64b6b8e",
+      "keywords": [
+        "E-Commerce Website"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "2e2b34b1-f602-4b3b-8b72-399560783858"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "f4954cd6-0822-400b-8115-23fc0e1699d2",
+      "parentNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "parentNodeName": "Node 1234",
+      "name": "Node-3444",
+      "interactiveId": "26f8fe13-884f-435d-b3e2-f6f9ad9be9df",
+      "keywords": [
+        "Android App"
+      ],
+      "type": "text",
+      "data": {
+        "interactiveType": "button",
+        "body": "",
+        "header": {
+          "type": "none"
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "a47920be-5c8d-4f3c-ba2e-b650a3c7473d"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "nodeId": "root",
+      "data": {
+        "interactiveType": "list",
+        "header": {
+          "type": "none",
+          "text": ""
+        },
+        "action": {
+          "buttons": [
+            {
+              "type": "reply",
+              "reply": {
+                "title": "Button 1",
+                "id": "09e15ce7-8d9b-440f-a47b-f46cf40d4ee5"
+              }
+            }
+          ],
+          "sections": [
+            {
+              "title": "Services",
+              "rows": [
+                {
+                  "id": "1e9bac00-62ff-49a2-af0b-76aaedfea52d",
+                  "title": " Branding & Identity",
+                  "description": ""
+                },
+                {
+                  "id": "377ccea2-a81b-4bd3-accb-e1d8a5af5909",
+                  "title": "Digital Marketing",
+                  "description": ""
+                },
+                {
+                  "id": "9504fec0-a0c8-4dc2-a92a-6d40e420a592",
+                  "title": "Website Development",
+                  "description": ""
+                },
+                {
+                  "id": "d84bb335-0074-4ed4-b126-3abf6f9f2d03",
+                  "title": "Mobile App Development",
+                  "description": ""
+                },
+                {
+                  "id": "63912b42-ca79-4ec1-8b8f-1a86211c1bd8",
+                  "title": "All Services ",
+                  "description": "(End to End Solutions)"
+                }
+              ]
+            }
+          ],
+          "button": "Please Choose"
+        },
+        "body": "Welcome to *Conceps Media Works*, your trusted partner for end-to-end digital solutions. We build, manage and grow your business through strategic execution."
+      },
+      "name": "Welcome ",
+      "keywords": [
+        "Hey"
+      ],
+      "type": "interactive"
+    }
+  ],
+  "edges": [
+    {
+      "toNodeId": "f4954cd6-0822-400b-8115-23fc0e1699d2",
+      "fromNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "intentName": "Android App",
+      "keywords": [
+        "Android App"
+      ],
+      "nextNodeName": "Node-3444",
+      "interactiveId": "26f8fe13-884f-435d-b3e2-f6f9ad9be9df",
+      "edgeId": "617b04ba-6353-499f-a661-22d49310b8fc-f4954cd6-0822-400b-8115-23fc0e1699d2",
+      "sourceHandleId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "targetHandleId": "f4954cd6-0822-400b-8115-23fc0e1699d2",
+      "label": "Android App"
+    },
+    {
+      "toNodeId": "d9999452-f466-42e5-91b4-6b1279d52111",
+      "fromNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "intentName": "iOS App",
+      "keywords": [
+        "iOS App"
+      ],
+      "nextNodeName": "Node-4341",
+      "interactiveId": "dab6f937-df76-471e-85be-1920be05712b",
+      "edgeId": "617b04ba-6353-499f-a661-22d49310b8fc-d9999452-f466-42e5-91b4-6b1279d52111",
+      "sourceHandleId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "targetHandleId": "d9999452-f466-42e5-91b4-6b1279d52111",
+      "label": "iOS App"
+    },
+    {
+      "toNodeId": "287561e2-7604-43ac-9251-6d599533b21b",
+      "fromNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "intentName": "Hybrid App",
+      "keywords": [
+        "Hybrid App"
+      ],
+      "nextNodeName": "Node-CB2C",
+      "interactiveId": "c01d7e44-e411-4eed-b0b2-2ff4bc988d86",
+      "edgeId": "617b04ba-6353-499f-a661-22d49310b8fc-287561e2-7604-43ac-9251-6d599533b21b",
+      "sourceHandleId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "targetHandleId": "287561e2-7604-43ac-9251-6d599533b21b",
+      "label": "Hybrid App"
+    },
+    {
+      "toNodeId": "4735e2ec-cad3-4463-b2a7-8438451aa37a",
+      "fromNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "intentName": "App Maintenance",
+      "keywords": [
+        "App Maintenance"
+      ],
+      "nextNodeName": "Node-34B3",
+      "interactiveId": "b3b1c0ea-1c5c-411d-aa25-6a79805195ff",
+      "edgeId": "617b04ba-6353-499f-a661-22d49310b8fc-4735e2ec-cad3-4463-b2a7-8438451aa37a",
+      "sourceHandleId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "targetHandleId": "4735e2ec-cad3-4463-b2a7-8438451aa37a",
+      "label": "App Maintenance"
+    },
+    {
+      "toNodeId": "1d8244ad-a9fd-4069-a80b-8f60311e35a7",
+      "fromNodeId": "b29fb905-bd59-46cf-88d6-54c62490227b",
+      "intentName": "All Services ",
+      "keywords": [
+        "All Services "
+      ],
+      "nextNodeName": "Node-A111",
+      "interactiveId": "e430d883-427b-476e-9e92-d9833dd38b95",
+      "edgeId": "b29fb905-bd59-46cf-88d6-54c62490227b-1d8244ad-a9fd-4069-a80b-8f60311e35a7",
+      "sourceHandleId": "b29fb905-bd59-46cf-88d6-54c62490227b",
+      "targetHandleId": "1d8244ad-a9fd-4069-a80b-8f60311e35a7",
+      "label": "All Services "
+    },
+    {
+      "toNodeId": "d1e0ed3e-8637-4a27-86aa-32f77f62e5a9",
+      "fromNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "intentName": "Logo Design",
+      "keywords": [
+        "Logo Design"
+      ],
+      "nextNodeName": "Node-32B3",
+      "interactiveId": "197425ea-2677-4a3a-a995-64620c29bfe9",
+      "edgeId": "b58fba56-b62b-423a-a330-83b081d80a91-d1e0ed3e-8637-4a27-86aa-32f77f62e5a9",
+      "sourceHandleId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "targetHandleId": "d1e0ed3e-8637-4a27-86aa-32f77f62e5a9",
+      "label": "Logo Design"
+    },
+    {
+      "toNodeId": "c4e41719-597b-41d2-bd41-038392ad34f2",
+      "fromNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "intentName": "Brand Strategy ",
+      "keywords": [
+        "Brand Strategy "
+      ],
+      "nextNodeName": "Node-B32B",
+      "interactiveId": "b0fbf0ac-1b04-4b84-9b3d-17776322c7d5",
+      "edgeId": "b58fba56-b62b-423a-a330-83b081d80a91-c4e41719-597b-41d2-bd41-038392ad34f2",
+      "sourceHandleId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "targetHandleId": "c4e41719-597b-41d2-bd41-038392ad34f2",
+      "label": "Brand Strategy "
+    },
+    {
+      "toNodeId": "71da99aa-dcc4-437b-be5f-046ef38b1dc5",
+      "fromNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "intentName": "Packaging Design",
+      "keywords": [
+        "Packaging Design"
+      ],
+      "nextNodeName": "Node-2BBB",
+      "interactiveId": "4ff0eeb6-2c96-4667-9d89-2d904c6e5275",
+      "edgeId": "b58fba56-b62b-423a-a330-83b081d80a91-71da99aa-dcc4-437b-be5f-046ef38b1dc5",
+      "sourceHandleId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "targetHandleId": "71da99aa-dcc4-437b-be5f-046ef38b1dc5",
+      "label": "Packaging Design"
+    },
+    {
+      "toNodeId": "842c8626-f0c6-41b4-9246-00f4ae097660",
+      "fromNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "intentName": "Complete Branding Kit",
+      "keywords": [
+        "Complete Branding Kit"
+      ],
+      "nextNodeName": "Node-42A4",
+      "interactiveId": "6a5d8cc4-6029-44d1-a681-5f933cd56f81",
+      "edgeId": "b58fba56-b62b-423a-a330-83b081d80a91-842c8626-f0c6-41b4-9246-00f4ae097660",
+      "sourceHandleId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "targetHandleId": "842c8626-f0c6-41b4-9246-00f4ae097660",
+      "label": "Complete Branding Kit"
+    },
+    {
+      "toNodeId": "2625f149-2692-4e37-a937-bfb415c482ab",
+      "fromNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "intentName": "Business Website",
+      "keywords": [
+        "Business Website"
+      ],
+      "nextNodeName": "Node-B1C3",
+      "interactiveId": "c605fc47-c45e-49ef-b028-c45c67faf57a",
+      "edgeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d-2625f149-2692-4e37-a937-bfb415c482ab",
+      "sourceHandleId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "targetHandleId": "2625f149-2692-4e37-a937-bfb415c482ab",
+      "label": "Business Website"
+    },
+    {
+      "toNodeId": "f0450a57-4de9-4c13-9b08-881068eaf990",
+      "fromNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "intentName": "E-Commerce Website",
+      "keywords": [
+        "E-Commerce Website"
+      ],
+      "nextNodeName": "Node-3343",
+      "interactiveId": "7dab65c8-ca5a-4080-b140-54cac64b6b8e",
+      "edgeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d-f0450a57-4de9-4c13-9b08-881068eaf990",
+      "sourceHandleId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "targetHandleId": "f0450a57-4de9-4c13-9b08-881068eaf990",
+      "label": "E-Commerce Website"
+    },
+    {
+      "toNodeId": "a7f679be-9a3e-48d5-b801-c96b1f6c8bb4",
+      "fromNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "intentName": "Landing Page",
+      "keywords": [
+        "Landing Page"
+      ],
+      "nextNodeName": "Node-4C43",
+      "interactiveId": "470eece7-2942-410b-b746-273942553863",
+      "edgeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d-a7f679be-9a3e-48d5-b801-c96b1f6c8bb4",
+      "sourceHandleId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "targetHandleId": "a7f679be-9a3e-48d5-b801-c96b1f6c8bb4",
+      "label": "Landing Page"
+    },
+    {
+      "toNodeId": "eae8cdd7-cefc-4684-b717-bb1bd84d3ac9",
+      "fromNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "intentName": "Website Redesign",
+      "keywords": [
+        "Website Redesign"
+      ],
+      "nextNodeName": "Node-C23B",
+      "interactiveId": "6da8039a-46f1-4132-962e-ed828e5ea4e5",
+      "edgeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d-eae8cdd7-cefc-4684-b717-bb1bd84d3ac9",
+      "sourceHandleId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "targetHandleId": "eae8cdd7-cefc-4684-b717-bb1bd84d3ac9",
+      "label": "Website Redesign"
+    },
+    {
+      "toNodeId": "4157284a-bc38-49d7-bba9-26e805997972",
+      "fromNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "intentName": "SEO",
+      "keywords": [
+        "SEO"
+      ],
+      "nextNodeName": "Node-A34A",
+      "interactiveId": "e8bd654b-4564-4d9c-8993-82d2c8469a68",
+      "edgeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28-4157284a-bc38-49d7-bba9-26e805997972",
+      "sourceHandleId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "targetHandleId": "4157284a-bc38-49d7-bba9-26e805997972",
+      "label": "SEO"
+    },
+    {
+      "toNodeId": "4c791fe6-49ff-47c4-992b-cd7471eb4764",
+      "fromNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "intentName": "Social Media Marketing",
+      "keywords": [
+        "Social Media Marketing"
+      ],
+      "nextNodeName": "Node-32B3",
+      "interactiveId": "48b062fd-6c86-4b33-a035-131eb9f6e04a",
+      "edgeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28-4c791fe6-49ff-47c4-992b-cd7471eb4764",
+      "sourceHandleId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "targetHandleId": "4c791fe6-49ff-47c4-992b-cd7471eb4764",
+      "label": "Social Media Marketing"
+    },
+    {
+      "toNodeId": "647a8ebb-181d-4d8c-af61-bc813abe40c0",
+      "fromNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "intentName": "Google Ads (PPC)",
+      "keywords": [
+        "Google Ads (PPC)"
+      ],
+      "nextNodeName": "Node-BA2A",
+      "interactiveId": "05582b9d-f9cc-4174-9b2a-61d6aff77bed",
+      "edgeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28-647a8ebb-181d-4d8c-af61-bc813abe40c0",
+      "sourceHandleId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "targetHandleId": "647a8ebb-181d-4d8c-af61-bc813abe40c0",
+      "label": "Google Ads (PPC)"
+    },
+    {
+      "toNodeId": "c82012cb-e211-4628-b954-39a2da6a0896",
+      "fromNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "intentName": "Content Marketing",
+      "keywords": [
+        "Content Marketing"
+      ],
+      "nextNodeName": "Node-341A",
+      "interactiveId": "fb87dcc1-82e4-4fe0-bee2-7cc2e2cd93ae",
+      "edgeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28-c82012cb-e211-4628-b954-39a2da6a0896",
+      "sourceHandleId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "targetHandleId": "c82012cb-e211-4628-b954-39a2da6a0896",
+      "label": "Content Marketing"
+    },
+    {
+      "toNodeId": "efa22592-de28-4a0b-a276-3d9b8a487370",
+      "fromNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "intentName": "All Services",
+      "keywords": [
+        "All Services"
+      ],
+      "nextNodeName": "Node-AB44",
+      "interactiveId": "4a83e4ac-8d94-4e23-a679-4526cb327048",
+      "edgeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28-efa22592-de28-4a0b-a276-3d9b8a487370",
+      "sourceHandleId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "targetHandleId": "efa22592-de28-4a0b-a276-3d9b8a487370",
+      "label": "All Services"
+    },
+    {
+      "toNodeId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "fromNodeId": "root",
+      "intentName": " Branding & Identity",
+      "keywords": [
+        " Branding & Identity"
+      ],
+      "nextNodeName": "Node-1BAC",
+      "interactiveId": "1e9bac00-62ff-49a2-af0b-76aaedfea52d",
+      "edgeId": "root-b58fba56-b62b-423a-a330-83b081d80a91",
+      "sourceHandleId": "root",
+      "targetHandleId": "b58fba56-b62b-423a-a330-83b081d80a91",
+      "label": " Branding & Identity"
+    },
+    {
+      "toNodeId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "fromNodeId": "root",
+      "intentName": "Digital Marketing",
+      "keywords": [
+        "Digital Marketing"
+      ],
+      "nextNodeName": "Node-1223",
+      "interactiveId": "377ccea2-a81b-4bd3-accb-e1d8a5af5909",
+      "edgeId": "root-e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "sourceHandleId": "root",
+      "targetHandleId": "e05c6dd7-d407-4340-86b4-ac4618b7bb28",
+      "label": "Digital Marketing"
+    },
+    {
+      "toNodeId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "fromNodeId": "root",
+      "intentName": "Website Development",
+      "keywords": [
+        "Website Development"
+      ],
+      "nextNodeName": "Node-1414",
+      "interactiveId": "9504fec0-a0c8-4dc2-a92a-6d40e420a592",
+      "edgeId": "root-d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "sourceHandleId": "root",
+      "targetHandleId": "d7b854d3-fe5e-46c1-a594-9d0fe7a2d60d",
+      "label": "Website Development"
+    },
+    {
+      "toNodeId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "fromNodeId": "root",
+      "intentName": "Mobile App Development",
+      "keywords": [
+        "Mobile App Development"
+      ],
+      "nextNodeName": "Node-2C34",
+      "interactiveId": "d84bb335-0074-4ed4-b126-3abf6f9f2d03",
+      "edgeId": "root-617b04ba-6353-499f-a661-22d49310b8fc",
+      "sourceHandleId": "root",
+      "targetHandleId": "617b04ba-6353-499f-a661-22d49310b8fc",
+      "label": "Mobile App Development"
+    },
+    {
+      "toNodeId": "b29fb905-bd59-46cf-88d6-54c62490227b",
+      "fromNodeId": "root",
+      "intentName": "All Services ",
+      "keywords": [
+        "All Services "
+      ],
+      "nextNodeName": "Node-A42A",
+      "interactiveId": "63912b42-ca79-4ec1-8b8f-1a86211c1bd8",
+      "edgeId": "root-b29fb905-bd59-46cf-88d6-54c62490227b",
+      "sourceHandleId": "root",
+      "targetHandleId": "b29fb905-bd59-46cf-88d6-54c62490227b",
+      "label": "All Services "
+    }
+  ],
+  "manualResolution": []
+}
