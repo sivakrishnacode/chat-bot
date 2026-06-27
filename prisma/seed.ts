@@ -1,5 +1,6 @@
 // prisma/seed.ts
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -202,24 +203,49 @@ const spaceSolarNodes = [
 ];
 
 async function main() {
-  const client = await prisma.client.create({
-    data: {
-      name: "SpaceSolar",
-      industry: "Solar Energy",
-      email: "contact@spacesolar.in",
-      flows: {
-        create: {
-          name: "SpaceSolar Support Bot",
-          description: "Product enquiry, dealer locator, support tickets, and quotes.",
-          nodes: {
-            create: spaceSolarNodes,
+  // Seed default admin user
+  const adminUsername = "admin";
+  const existingUser = await prisma.user.findUnique({
+    where: { username: adminUsername },
+  });
+
+  if (!existingUser) {
+    const hashedPassword = await bcrypt.hash("adminpass", 10);
+    const user = await prisma.user.create({
+      data: {
+        username: adminUsername,
+        password: hashedPassword,
+        name: "Administrator",
+      },
+    });
+    console.log(`✅ Seeded user: ${user.username}`);
+  } else {
+    console.log(`ℹ️ Admin user already exists`);
+  }
+
+  // Seed SpaceSolar client if not exists
+  const clientCount = await prisma.client.count();
+  if (clientCount === 0) {
+    const client = await prisma.client.create({
+      data: {
+        name: "SpaceSolar",
+        industry: "Solar Energy",
+        email: "contact@spacesolar.in",
+        flows: {
+          create: {
+            name: "SpaceSolar Support Bot",
+            description: "Product enquiry, dealer locator, support tickets, and quotes.",
+            nodes: {
+              create: spaceSolarNodes,
+            },
           },
         },
       },
-    },
-  });
-
-  console.log(`✅ Seeded client: ${client.name} (${client.id})`);
+    });
+    console.log(`✅ Seeded client: ${client.name} (${client.id})`);
+  } else {
+    console.log(`ℹ️ Client data already seeded`);
+  }
 }
 
 main()

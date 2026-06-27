@@ -2,9 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SidebarClient() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        router.push("/login");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <>
@@ -69,8 +83,17 @@ export default function SidebarClient() {
           </Link>
         </nav>
 
-        <div className="px-4 py-4 border-t text-xs" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
-          Conceps WhatsApp Bot Platform
+        <div className="px-4 py-4 border-t flex flex-col gap-2" style={{ borderColor: "var(--border)" }}>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-red-500/10 text-red-400 font-medium"
+          >
+            <span>🚪</span>
+            <span>Logout</span>
+          </button>
+          <div className="text-xs mt-1" style={{ color: "var(--muted)" }}>
+            Conceps WhatsApp Bot Platform
+          </div>
         </div>
       </aside>
     </>

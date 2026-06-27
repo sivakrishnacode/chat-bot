@@ -54,3 +54,13 @@ model FlowNode {
   @@unique([flowId, key])
   @@index([flowId])
 }
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Hashed password
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
