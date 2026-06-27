@@ -52,12 +52,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Determine if connection is HTTPS
+    const protocol = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol;
+    const isHttps = protocol === "https" || protocol === "https:";
+
     // Set cookie
     response.cookies.set({
       name: "session",
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       path: "/",
       maxAge: 2 * 60 * 60, // 2 hours

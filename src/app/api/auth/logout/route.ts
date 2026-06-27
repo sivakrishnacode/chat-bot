@@ -5,12 +5,16 @@ export async function POST(request: NextRequest) {
   try {
     const response = NextResponse.json({ success: true });
     
+    // Determine if connection is HTTPS
+    const protocol = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol;
+    const isHttps = protocol === "https" || protocol === "https:";
+
     // Clear the session cookie
     response.cookies.set({
       name: "session",
       value: "",
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       path: "/",
       maxAge: 0, // expire immediately
